@@ -10,7 +10,6 @@ interface Props {
   pointT: string;
   result: string;
   color: string;
-  hover: string;
 }
 
 export default function Experience({
@@ -21,8 +20,7 @@ export default function Experience({
   pointS,
   pointT,
   result,
-  color,
-  hover,
+  color
 }: Props) {
   return (
     <div className="lg:w-2/3 flex align-center flex-col rounded-2xl border-4 border-neutral-800 p-4 mb-11">

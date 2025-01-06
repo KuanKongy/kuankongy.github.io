@@ -5,7 +5,7 @@ export default function Contact() {
   return (
     <section className="pb-8 mb-20" id="contact">
       <div className="text-center">
-        <h2 className="mt-10 mb-6 text-center text-4xl text-black dark:text-white">Let's Stay in Touch!</h2>
+        <h2 className="mt-10 mb-6 text-center text-4xl text-black dark:text-white">Let&apos;s Stay in Touch!</h2>
         <p className="my-4 text-xl text-opacity-80 text-black dark:text-opacity-80 dark:text-white">Feel free to follow my socials!</p>
         <p className="font-semibold text-xl text-blue-500">khanhpronam@gmail.com</p>
         <div className="mt-8 flex justify-center gap-4">

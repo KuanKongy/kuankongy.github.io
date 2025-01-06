@@ -1,8 +1,8 @@
 "use client";
 import React from "react";
 import { IoLogoJavascript, IoLogoCss3, IoLogoHtml5 } from "react-icons/io5";
-import { SiTypescript, SiNextdotjs, SiStyledcomponents, SiTailwindcss, SiExpress, SiFirebase, SiCplusplus, SiC, SiSocketdotio } from "react-icons/si";
-import { FaReact, FaNode, FaJava, FaPython } from "react-icons/fa";
+import { SiTypescript, SiNextdotjs, SiStyledcomponents, SiTailwindcss, SiExpress, SiFirebase, SiCplusplus, SiSocketdotio } from "react-icons/si";
+import { FaReact, FaNode, FaJava } from "react-icons/fa";
 import { FaGitAlt } from "react-icons/fa6";
 import { BsFiletypeSql } from "react-icons/bs";
 

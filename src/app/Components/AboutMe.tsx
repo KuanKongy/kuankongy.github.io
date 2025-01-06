@@ -9,7 +9,7 @@ export default function AboutMe() {
       <div className="grid grid-cols-1 lg:grid-cols-12">
         <div className="col-span-7 place-self-center">
           <h1 className="animated">
-            <span className="mb-4 text-black dark:text-white">Hey, I'm </span>
+            <span className="mb-4 text-black dark:text-white">Hey, I&apos;m </span>
             <div className="animated-info">
               <span className="animated-item">Nam Khanh</span>
               <span className="animated-item">a Developer</span>
