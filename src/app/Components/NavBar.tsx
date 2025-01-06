@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavLink from "./NavLink";
 import MenuOverlay from "./MenuOverlay";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
@@ -35,7 +35,12 @@ const navLinks = [
 
 export default function NavBar() {
   const [navbarOpen, setNavbarOpen] = useState(false);
-  return (
+  const [mount, setMount] = useState(false);
+  useEffect(() => {
+    setMount(true);
+  }, []);
+
+  return mount ? (
     <nav className="fixed pb-0 top-0 left-0 right-0 z-999 bg-slate-200 dark:bg-[#121212] bg-opacity-90">
       <div className="flex flex-wrap items-center justify-end mx-auto py-4 pr-4 md:pr-0">
         <div className="mobile-menu flex flex-row items-center space-x-6 md:hidden">
@@ -69,5 +74,5 @@ export default function NavBar() {
       </div>
       {navbarOpen ? <MenuOverlay /> : null}
     </nav>
-  );
+  ) : null;
 };
