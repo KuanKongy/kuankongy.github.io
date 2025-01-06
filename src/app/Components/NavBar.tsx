@@ -33,7 +33,7 @@ const navLinks = [
   },
 ];
 
-export default function Header() {
+export default function NavBar() {
   const [navbarOpen, setNavbarOpen] = useState(false);
   return (
     <nav className="fixed pb-0 top-0 left-0 right-0 z-999 bg-slate-200 dark:bg-[#121212] bg-opacity-90">
