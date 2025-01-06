@@ -11,7 +11,6 @@ const experienceInfo = [
     pointT: "Supported students’ academic success by hosting formal office hours after classes and actively answering questions on Piazza, creating an inclusive and responsive learning environment.",
     result: "This experience not only deepened my understanding of key computer science concepts but also honed my communication, collaboration, and mentorship skills. Grateful to have been part of a vibrant teaching community and to contribute to the success of so many students.",
     color: "text-blue-600",
-    hover: "hover:text-purple-600",
   },
 ];
 
@@ -31,7 +30,6 @@ export default function MyExperiences() {
             pointT={info.pointT}
             result={info.result}
             color={info.color}
-            hover={info.hover}
           />
         ))}
       </div>
