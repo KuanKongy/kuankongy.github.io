@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   output: "export", 
   basePath: "/Portfolio",
-  assetPrefix: "/Portfolio",
+  assetPrefix: "/Portfolio/",
   images: {
     unoptimized: true
 }
