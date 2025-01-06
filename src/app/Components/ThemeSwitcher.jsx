@@ -3,13 +3,13 @@ import {useTheme} from "next-themes";
 import {useEffect, useState} from "react";
 import { PiMoonFill, PiSun } from "react-icons/pi";
 const ThemeSwitcher = () => {
-  const [mount, setMount] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const {systemTheme, theme, setTheme} = useTheme();
   const currentTheme = theme === "system" ? systemTheme : theme;
   useEffect(() => {
-    setMount(true);
+    setIsHydrated(true);
   }, []);
-  return mount ? (
+  return isHydrated ? (
     <div >
       <button
         onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
