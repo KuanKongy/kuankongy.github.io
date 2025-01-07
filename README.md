@@ -1,4 +1,6 @@
-This is my portfolio with a responsive user interface built using Typescript, Next.js, and Tailwind CSS. It showcases my skills, experiences, and projects; it also has my resume and links to socials.
+This is my portfolio with a responsive user interface built using Typescript, Next.js, and Tailwind CSS. It showcases my skills, experiences, and projects; it also has my resume and links to socials.  
+
+Link of portfolio: https://KuanKongy.github.io/
 
 ## Getting Started
 
