@@ -6,6 +6,14 @@ import { FaReact, FaNode, FaJava } from "react-icons/fa";
 import { FaGitAlt } from "react-icons/fa6";
 import { BsFiletypeSql } from "react-icons/bs";
 import { DiRedis } from "react-icons/di";
+import type { IconType } from "react-icons";
+
+interface TechBadgeProps {
+  icon: IconType;
+  name: string;
+  color: string;
+  size: number;
+}
 
 const techStack = [
   { name: "Java", icon: FaJava, color: "hover:border-rose-900 hover:bg-rose-900", size: 25 },
@@ -43,7 +51,7 @@ const techStack = [
   { name: "Heroku", icon: SiHeroku, color: "hover:border-purple-900 hover:bg-purple-900", size: 25 },
 ];
 
-function TechBadge({ icon: Icon, name, color, size }: any) {
+function TechBadge({ icon: Icon, name, color, size }: TechBadgeProps) {
   return (
     <div
       className={`flex flex-row items-center justify-center gap-2 border-2 rounded-xl px-4 py-3 transition-colors duration-200 dark:text-white text-black border-gray-500 hover:bg-opacity-20 ${color}`}
