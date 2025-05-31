@@ -6,7 +6,6 @@ import { SiTypescript, SiNextdotjs, SiStyledcomponents, SiTailwindcss, SiExpress
   SiVitest, SiTerraform, SiKubernetes, SiDocker, SiGrafana, SiPrometheus, SiHelm, SiMysql, SiGraphql, SiPython, SiFlask,
   SiFastapi, SiAnsible, SiJenkins, SiMongodb, SiGooglecloud } from "react-icons/si";
 import { FaReact, FaNode, FaJava, FaAws } from "react-icons/fa";
-import { FaGitAlt } from "react-icons/fa6";
 import { BsFiletypeSql } from "react-icons/bs";
 import { DiRedis } from "react-icons/di";
 import { VscAzure } from "react-icons/vsc";
@@ -28,6 +27,7 @@ const techStack = [
   { name: "C++", icon: SiCplusplus, color: "hover:border-blue-800 hover:bg-blue-800", size: 25 },
   { name: "HTML5", icon: IoLogoHtml5, color: "hover:border-orange-600 hover:bg-orange-600", size: 23 },
   { name: "CSS3", icon: IoLogoCss3, color: "hover:border-blue-600 hover:bg-blue-600", size: 25 },
+  { name: "SQL", icon: BsFiletypeSql, color: "hover:border-gray-600 hover:bg-gray-600", size: 25 },
   
   { name: "Next.js", icon: SiNextdotjs, color: "hover:border-black hover:bg-black", size: 25 },
   { name: "Node.js", icon: FaNode, color: "hover:border-green-600 hover:bg-green-600", size: 25 },
@@ -36,7 +36,7 @@ const techStack = [
 
   { name: "React", icon: FaReact, color: "hover:border-cyan-500 hover:bg-cyan-500", size: 25 },
   { name: "Vite", icon: SiVite, color: "hover:border-indigo-700 hover:bg-indigo-700", size: 25 },
-  { name: "Tailwind CSS", icon: SiTailwindcss, color: "hover:border-sky-500 hover:bg-sky-500", size: 25 },
+  { name: "Tailwind", icon: SiTailwindcss, color: "hover:border-sky-500 hover:bg-sky-500", size: 25 },
   { name: "BootStrap", icon: SiBootstrap, color: "hover:border-violet-500 hover:bg-violet-500", size: 25 },
   { name: "Chakra-UI", icon: SiChakraui, color: "hover:border-teal-600 hover:bg-teal-600", size: 25 },
   { name: "ShadCN", icon: SiShadcnui, color: "hover:border-stone-950 hover:bg-stone-950", size: 25 },
