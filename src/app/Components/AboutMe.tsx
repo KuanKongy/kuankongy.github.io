@@ -23,7 +23,7 @@ export default function AboutMe() {
           </p>
           <div className="grid grid-cols-1 lg:flex lg:flex-row lg:items-center lg:justify-start">
               <a
-                href="https://drive.google.com/file/d/1f1HURcxhpL_Ed9nfJ9z4-zzVuZk6yoPC/view?usp=sharing"
+                href="https://drive.google.com/file/d/14oTBXBsqk1k9xeKrHCXZTeOLP-AtxBF4/view?usp=sharing"
                 target="_blank"
                 rel="noreferrer"
                 className="flex justify-center px-6 py-3 my-2 font-semibold rounded-xl lg:mr-4 bg-black dark:bg-white

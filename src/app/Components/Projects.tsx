@@ -6,9 +6,9 @@ const projectInfo = [
   {
     title: "Course Finder (Academic)",
     stack: "TypeScript, Node.js, Express.js, React, Vite, Bootstrap, Mocha, Chai",
-    description: "A full-stack web app with a RESTful API backend built using TypeScript, Node.js, and Express.js for preprocessing academic datasets and supporting complex SQL-like queries. Uses the Facade pattern to enable multiple frontend integrations with varied functionality. Developed a React, Vite, and Bootstrap frontend for analyzing course sections data. Tested backend logic and server using Mocha, Chai and Supertest. Deployed backend on Heroku and frontend on GitHub Pages.",
+    description: "A full-stack web app with a RESTful API backend built using TypeScript, Node.js, and Express.js for preprocessing academic datasets and supporting complex SQL-like queries. Uses the Facade pattern to enable multiple frontend integrations with varied functionality. Developed a React, Vite, and Bootstrap frontend for analyzing course sections data. Tested backend logic and server using Mocha, Chai and Supertest. Deployed frontend on Github pages and backend on Heroku and AWS EKS via Terraform with monitoring.",
     photo: TetrisDemo,
-    repo: "",
+    repo: "https://gitfront.io/r/KuanKongy/5hmgkWi4SLim/CourseInsights/",
     app: "https://kuankongy.github.io/CourseFinder/",
     color: "text-emerald-400",
     hover: "hover:text-emerald-400",
@@ -18,7 +18,7 @@ const projectInfo = [
   {
     title: "Video Summarizer (Hackathon)",
     stack: "Python, Flask, Whisper, GPT-4, Redis, PyTorch, CUDA, FFmpeg, Sentence Transformers, React, Vite, Tailwind",
-    description: "An AI-powered tool with a Flask-based RESTful API that transforms lecture videos into searchable, summarized content. Uses FFmpeg to extract audio, Whisper for transcription, GPT-4 for summarization, and Sentence Transformers for semantic search. Developed Frontend with React, Vite, and Tailwind CSS. Optimized with Redis caching and GPU-accelerated PyTorch + CUDA for fast, high-performance inference. Deployed backend on Heroku and frontend on Github pages. Redis is rented on Upstash.",
+    description: "An AI-powered tool with a Flask-based RESTful API that transforms lecture videos into searchable, summarized content. Uses FFmpeg to extract audio, Whisper for transcription, GPT-4 for summarization, and Sentence Transformers for semantic search. Developed Frontend with React, Vite, and Tailwind CSS. Optimized with Redis caching and GPU-accelerated PyTorch + CUDA for fast, high-performance inference. Deployed frontend on Github pages and backend on Heroku and AWS EC2. Redis is on Upstash.",
     photo: TetrisDemo,
     repo: "https://github.com/KuanKongy/DeepRecall.git",
     app: "https://kuankongy.github.io/DeepRecall/",
@@ -78,7 +78,7 @@ const projectInfo = [
   {
     title: "National Pokedex (Academic)",
     stack: "JavaScript, Node.js, Express.js, OracleDB, React, Vite, HTML, CSS, Chakra-UI",
-    description: "A full-stack web application centered around a custom-designed OracleDB schema modelling complex relationships between Pokémon, Trainers, and Regions. Built a RESTful API with JavaScript, Node.js and Express.js to query Pokémon attributes, evolutions, and their associations with game-world elements. Developed a frontend using React, Vite, HTML/CSS, and Chakra-UI. Not deployed because of restrictions.",
+    description: "A full-stack web application centered around a custom-designed OracleDB schema modelling complex relationships between Pokémon, Trainers, and Regions. Built a RESTful API with JavaScript, Node.js and Express.js to query Pokémon attributes, evolutions, and their associations with game-world elements. Developed a frontend using React, Vite, HTML/CSS, and Chakra-UI. Not deployed due to Oracle license.",
     photo: NationalDemo,
     repo: "https://github.com/KuanKongy/NationalPokedex.git",
     app: "",
@@ -114,7 +114,7 @@ const projectInfo = [
   {
     title: "Under Construction...",
     stack: "Coming Soon!",
-    description: "Stay tuned for my upcoming projects! Currently learning advanced algorithms and making a capstone project.",
+    description: "Stay tuned for my upcoming projects! Currently working on two projects: AI Onboarding Buddy (repository walkthrough), Chat Searcher (semantic search of all chats).",
     photo: TetrisDemo,
     repo: "https://github.com/KuanKongy",
     app: "",
