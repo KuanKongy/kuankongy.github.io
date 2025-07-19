@@ -9,7 +9,7 @@ const projectInfo = [
     description: "A full-stack web app with a RESTful API backend built using TypeScript, Node.js, and Express.js for preprocessing academic datasets and supporting complex SQL-like queries. Uses the Facade pattern to enable multiple frontend integrations with varied functionality. Developed a React, Vite, and Bootstrap frontend for analyzing course sections data. Tested backend logic and server using Mocha, Chai and Supertest. Deployed frontend on Github pages and backend on Heroku and AWS EKS via Terraform with monitoring.",
     photo: TetrisDemo,
     repo: "https://gitfront.io/r/KuanKongy/5hmgkWi4SLim/CourseInsights/",
-    app: "https://kuankongy.github.io/CourseFinder/",
+    app: "https://kuankongy.github.io/CourseInsights/",
     color: "text-emerald-400",
     hover: "hover:text-emerald-400",
     link: "7ftauN3dMcQ",
