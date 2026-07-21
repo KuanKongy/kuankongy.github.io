@@ -13,7 +13,7 @@ export default function GameOverCard() {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-0 z-30 flex items-center justify-center transition-opacity duration-500 ${
+      className={`dark pointer-events-none fixed inset-0 z-30 flex items-center justify-center transition-opacity duration-500 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
       aria-hidden={!visible}

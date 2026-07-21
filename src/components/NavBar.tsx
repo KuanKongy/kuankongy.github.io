@@ -3,23 +3,23 @@ import { Link } from "react-scroll";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/solid";
 import { PiMoonFill, PiSun } from "react-icons/pi";
 import { useGameStore } from "../store/gameStore";
+import SparkleStar from "./ui/SparkleStar";
 
 const navLinks = [
-  { title: "About", path: "about", hover: "hover:text-tetra-z" },
-  { title: "Languages", path: "languages", hover: "hover:text-tetra-s" },
-  { title: "Experiences", path: "experiences", hover: "hover:text-tetra-l" },
-  { title: "Projects", path: "projects", hover: "hover:text-tetra-t" },
-  { title: "Contact", path: "contact", hover: "hover:text-tetra-j" },
+  { title: "About", path: "about" },
+  { title: "Projects", path: "projects" },
+  { title: "Experience", path: "experience" },
+  { title: "Skills", path: "skills" },
+  { title: "Contact", path: "contact" },
 ];
 
 interface LinkProps {
   path: string;
   title: string;
-  hover: string;
   onClick?: () => void;
 }
 
-function NavLink({ path, title, hover, onClick }: LinkProps) {
+function NavLink({ path, title, onClick }: LinkProps) {
   return (
     <Link
       to={path}
@@ -28,7 +28,7 @@ function NavLink({ path, title, hover, onClick }: LinkProps) {
       offset={-80}
       duration={400}
       onClick={onClick}
-      className={`block cursor-pointer rounded-md px-4 py-2 text-base font-semibold text-white/85 transition hover:bg-white/10 ${hover}`}
+      className="hover-lift flex min-h-[44px] cursor-pointer items-center rounded-md px-4 font-mono text-xs font-medium uppercase tracking-widest text-ink/75 hover:text-[color:var(--accent-strong)]"
     >
       {title}
     </Link>
@@ -42,7 +42,7 @@ function ThemeSwitcher() {
     <button
       type="button"
       onClick={toggle}
-      className="flex h-10 w-10 items-center justify-center rounded-md text-white/80 hover:bg-white/10"
+      className="hover-lift flex h-11 w-11 items-center justify-center rounded-md text-ink/80 hover:text-[color:var(--accent-strong)]"
       aria-label="Toggle theme"
     >
       {isDark ? <PiSun size={22} /> : <PiMoonFill size={22} />}
@@ -54,18 +54,19 @@ export default function NavBar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-30 frosted-soft border-b border-white/10">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+    <nav className="frosted-soft fixed inset-x-0 top-0 z-30 rounded-none border-x-0 border-t-0 border-b border-[color:var(--glass-border-soft)]">
+      <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between px-5 py-2 md:px-10">
         <Link
           to="hero"
           smooth={true}
           duration={400}
-          className="flex cursor-pointer items-center gap-2 font-arcade text-sm text-tetra-i"
+          className="flex min-h-[44px] cursor-pointer items-center gap-2.5"
         >
-          <span className="inline-block h-3 w-3 rounded-sm bg-tetra-i" />
-          <span className="inline-block h-3 w-3 rounded-sm bg-tetra-t" />
-          <span className="inline-block h-3 w-3 rounded-sm bg-tetra-l" />
-          <span className="ml-2 text-white">NAM·LE</span>
+          <SparkleStar size={20} />
+          <span className="font-display text-lg font-bold">
+            <span className="grad-text">Nam</span>{" "}
+            <span className="text-ink">Le</span>
+          </span>
         </Link>
 
         <div className="hidden items-center gap-1 md:flex">
@@ -79,10 +80,15 @@ export default function NavBar() {
           <ThemeSwitcher />
           <button
             onClick={() => setOpen((o) => !o)}
-            className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-white/10"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-ink/80 hover:text-[color:var(--accent-strong)]"
             aria-label="Toggle menu"
+            aria-expanded={open}
           >
-            {open ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+            {open ? (
+              <XMarkIcon className="h-6 w-6" />
+            ) : (
+              <Bars3Icon className="h-6 w-6" />
+            )}
           </button>
         </div>
       </div>

@@ -56,7 +56,9 @@ export default function LobbyOverlay() {
 
   return (
     <div
-      className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-500 ${
+      // `dark` scopes the night glass tokens — the game UI keeps its arcade
+      // night identity even when the site is in day theme.
+      className={`dark fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-500 ${
         visible
           ? "pointer-events-none opacity-100"
           : "pointer-events-none opacity-0"

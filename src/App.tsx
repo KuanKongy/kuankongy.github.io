@@ -11,7 +11,7 @@ export default function App() {
   const showNav = phase === "PORTFOLIO";
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden text-white">
+    <div className="relative min-h-screen w-full overflow-x-hidden">
       <ThreeCanvas />
       {showNav && <NavBar />}
       <PortfolioOverlay />

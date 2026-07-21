@@ -24,21 +24,25 @@ export default function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[80vh] flex-col items-start justify-center"
+      className="relative flex min-h-[calc(100svh-8rem)] flex-col items-start justify-center"
     >
-      <div className="frosted w-full max-w-[31rem] px-6 py-10 md:px-10">
-        <p className="mb-2 font-arcade text-xs tracking-widest text-tetra-i/90">
+      {/* Small glass intro card on the left — the castle stays visible. */}
+      <div className="frosted w-full max-w-[34rem] px-6 py-10 md:px-10">
+        <p className="mb-3 font-arcade text-[10px] tracking-widest text-[color:var(--accent-strong)] md:text-xs">
           // PORTFOLIO · TRICKY TOWERS 3D
         </p>
-        <h1 className="animated text-4xl font-black leading-tight md:text-5xl">
-          <span className="mb-4 block text-white">Hey, I&apos;m </span>
-          <span className="animated-info">
-            <span className="animated-item">Nam Khanh</span>
-            <span className="animated-item">a Developer</span>
-            <span className="animated-item">a Student</span>
-          </span>
+        <h1 className="font-display text-4xl font-extrabold leading-tight md:text-5xl">
+          <span className="block text-ink">Hey, I&apos;m</span>
+          <span className="grad-text block pb-1">Nam Khanh</span>
         </h1>
-        <p className="mt-6 max-w-2xl text-base text-white/80 md:text-lg">
+        <p className="animated mt-2 font-mono text-lg text-ink/90 md:text-xl">
+          <span className="animated-info">
+            <span className="animated-item">a Full-Stack Developer</span>
+            <span className="animated-item">a CS Student @ UBC</span>
+            <span className="animated-item">a Problem Solver</span>
+          </span>
+        </p>
+        <p className="mt-5 max-w-2xl text-base text-ink/80 md:text-lg">
           I build systems, solve problems, and stack blocks (literally).
         </p>
 
@@ -46,12 +50,10 @@ export default function HeroSection() {
           <button
             type="button"
             className="play-btn"
-            onClick={() => {
-              setPhase("LOBBY_TRANSITION");
-              console.info("[Phase] PORTFOLIO -> LOBBY_TRANSITION (deferred to next slice)");
-            }}
+            onClick={() => setPhase("LOBBY_TRANSITION")}
           >
-            <span>Play Tricky Towers</span>
+            <span className="font-arcade text-[11px]">PLAY</span>
+            <span>Tricky Towers</span>
             <TetrisIcon />
           </button>
 
@@ -59,11 +61,35 @@ export default function HeroSection() {
             href="https://drive.google.com/file/d/14oTBXBsqk1k9xeKrHCXZTeOLP-AtxBF4/view?usp=sharing"
             target="_blank"
             rel="noreferrer"
-            className="rounded-full border border-white/30 px-6 py-3 font-semibold text-white/90 transition hover:border-white/60 hover:bg-white/5"
+            className="btn-ghost"
           >
             View Resume
           </a>
         </div>
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-ink/60"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.35em]">
+          scroll
+        </span>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          className="animate-bounce-slow"
+        >
+          <path
+            d="M3 6l5 5 5-5"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </div>
     </section>
   );

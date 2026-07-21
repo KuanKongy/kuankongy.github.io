@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   Theme tokens. Light (dawn) values live on :root, night values on .dark.
+   The 3D scene flips day/night from the same isDark flag in the game store.
+--------------------------------------------------------------------------- */
+:root {
+  --ink: 30 24 58; /* #1e183a deep indigo */
+  --page-bg: #dbe7fb;
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-soft: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(109, 40, 217, 0.2);
+  --glass-border-soft: rgba(30, 24, 58, 0.14);
+  --glass-shadow:
+    0 18px 48px -16px rgba(74, 42, 154, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+  --line-strong: rgba(30, 24, 58, 0.35);
+  --accent-strong: #a21caf; /* accessible accent text on light glass */
+  --accent-soft: #6d28d9;
+  --glow: rgba(162, 28, 175, 0.28);
+  --grad-from: #6d28d9;
+  --grad-mid: #a21caf;
+  --grad-to: #6d28d9;
+  --scrollbar-thumb: rgba(109, 40, 217, 0.35);
+  --scrollbar-thumb-hover: rgba(109, 40, 217, 0.55);
+}
+
+.dark {
+  --ink: 244 240 255; /* #f4f0ff */
+  --page-bg: #06030f;
+  --glass-bg: rgba(15, 5, 40, 0.55);
+  --glass-bg-soft: rgba(15, 5, 40, 0.35);
+  --glass-border: rgba(180, 160, 255, 0.18);
+  --glass-border-soft: rgba(255, 255, 255, 0.08);
+  --glass-shadow:
+    0 18px 48px -16px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  --line-strong: rgba(255, 255, 255, 0.3);
+  --accent-strong: #e879f9;
+  --accent-soft: #a78bfa;
+  --glow: rgba(217, 70, 239, 0.35);
+  --grad-from: #a78bfa;
+  --grad-mid: #e879f9;
+  --grad-to: #a78bfa;
+  --scrollbar-thumb: rgba(125, 80, 220, 0.5);
+  --scrollbar-thumb-hover: rgba(155, 100, 255, 0.7);
+}
+
 html,
 body,
 #root {
@@ -11,38 +57,137 @@ body,
 
 html {
   scroll-behavior: smooth;
-  background: #06030f;
+  background: var(--page-bg);
 }
 
 body {
   overflow-x: hidden;
-  background: #06030f;
-  color: #f4f0ff;
-  font-family: "Roboto", system-ui, sans-serif;
+  background: var(--page-bg);
+  color: rgb(var(--ink));
+  font-family: "DM Sans", system-ui, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
 @layer components {
   .frosted {
-    background: rgba(15, 5, 40, 0.55);
+    background: var(--glass-bg);
     backdrop-filter: blur(10px) saturate(120%);
     -webkit-backdrop-filter: blur(10px) saturate(120%);
-    border: 1px solid rgba(180, 160, 255, 0.18);
+    border: 1px solid var(--glass-border);
     border-radius: 1.25rem;
-    box-shadow:
-      0 18px 48px -16px rgba(0, 0, 0, 0.7),
-      0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    box-shadow: var(--glass-shadow);
   }
 
   .frosted-soft {
-    background: rgba(15, 5, 40, 0.35);
+    background: var(--glass-bg-soft);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border-soft);
     border-radius: 1rem;
+  }
+
+  /* Animated gradient text — the violet→fuchsia family signature. */
+  .grad-text {
+    background: linear-gradient(
+      135deg,
+      var(--grad-from),
+      var(--grad-mid),
+      var(--grad-to)
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: grad-shift 4s ease infinite;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 0.75rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--glow);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.4rem;
+    border-radius: 0.75rem;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(var(--ink) / 0.9);
+    border: 1px solid var(--line-strong);
+    transition: transform 200ms ease, border-color 200ms ease,
+      box-shadow 200ms ease, color 200ms ease;
+  }
+
+  .btn-ghost:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-strong);
+    color: var(--accent-strong);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  .hover-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease,
+      border-color 200ms ease, background-color 200ms ease, color 200ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Skill pill — brand-colored glow on hover, tint set via --glow-c. */
+  .skill-pill {
+    transition: box-shadow 0.2s ease, border-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .skill-pill:hover {
+    border-color: var(--glow-c);
+    transform: translateY(-1px);
+    box-shadow:
+      0 0 12px color-mix(in srgb, var(--glow-c) 45%, transparent),
+      0 0 28px color-mix(in srgb, var(--glow-c) 18%, transparent);
+  }
+
+  /* Scroll-reveal (driven by ui/Reveal.tsx). */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+
+  .reveal.on {
+    opacity: 1;
+    transform: none;
   }
 
   .play-btn {
@@ -58,28 +203,40 @@ body {
     border-style: solid;
     background: linear-gradient(
       120deg,
-      rgba(204, 0, 255, 0.55),
-      rgba(0, 229, 255, 0.55),
-      rgba(255, 109, 0, 0.55)
+      rgba(124, 58, 237, 0.65),
+      rgba(217, 70, 239, 0.65),
+      rgba(56, 189, 248, 0.55)
     );
     background-size: 200% 200%;
     animation: play-pulse 4s linear infinite, play-shine 8s ease-in-out infinite;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow:
-      0 0 24px rgba(125, 0, 255, 0.55),
-      0 0 8px rgba(0, 229, 255, 0.35) inset;
+      0 0 24px rgba(167, 139, 250, 0.55),
+      0 0 8px rgba(217, 70, 239, 0.35) inset;
     transition: transform 200ms ease, box-shadow 200ms ease;
   }
 
   .play-btn:hover {
-    transform: translateY(-1px) scale(1.03);
+    transform: translateY(-2px) scale(1.02);
     box-shadow:
-      0 0 36px rgba(125, 0, 255, 0.7),
-      0 0 12px rgba(0, 229, 255, 0.55) inset;
+      0 0 36px rgba(217, 70, 239, 0.7),
+      0 0 12px rgba(167, 139, 250, 0.55) inset;
   }
 }
 
 @keyframes play-shine {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes grad-shift {
   0% {
     background-position: 0% 50%;
   }
@@ -117,9 +274,9 @@ body {
     bottomToTop 10s linear infinite,
     blinkCaret 0.75s step-end infinite;
   margin: 0 auto;
-  border-right: 4px solid #cc00ff;
+  border-right: 4px solid #d946ef;
   white-space: nowrap;
-  color: #cc00ff;
+  color: #d946ef;
 }
 
 .animated-item:nth-child(2n + 2) {
@@ -127,6 +284,12 @@ body {
 }
 .animated-item:nth-child(3n + 3) {
   animation-delay: 6.66s;
+}
+
+/* Light theme needs the deeper fuchsia to stay readable on bright glass. */
+:root:not(.dark) .animated-item {
+  color: #a21caf;
+  border-right-color: #a21caf;
 }
 
 @keyframes bottomToTop {
@@ -148,19 +311,51 @@ body {
 
 @keyframes blinkCaret {
   from, to { border-color: transparent; }
-  50% { border-color: #cc00ff; }
+  50% { border-color: #d946ef; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  /* Typewriter fallback: show the first line statically, hide the rest. */
+  .animated-item {
+    position: static;
+    opacity: 1;
+    animation: none;
+    border-right: none;
+    width: auto;
+  }
+
+  .animated-item ~ .animated-item {
+    display: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.15);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(125, 80, 220, 0.5);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(155, 100, 255, 0.7);
+  background: var(--scrollbar-thumb-hover);
 }

@@ -66,9 +66,11 @@ const stored = (() => {
   const hi = Number(localStorage.getItem("trickyTowers.highScore") || "0");
   const dark = localStorage.getItem("trickyTowers.dark");
   const m = localStorage.getItem("trickyTowers.mode");
+  // ?theme=light|dark overrides the saved preference for that visit.
+  const forced = new URLSearchParams(window.location.search).get("theme");
   return {
     hi: isNaN(hi) ? 0 : hi,
-    dark: dark === null ? true : dark === "1",
+    dark: forced ? forced !== "light" : dark === null ? true : dark === "1",
     mode: (m === "ENDLESS" ? "ENDLESS" : "SURVIVAL") as GameMode,
   };
 })();
@@ -146,12 +148,19 @@ export const useGameStore = create<GameState>((set, get) => ({
       const next = !s.isDark;
       if (typeof window !== "undefined") {
         localStorage.setItem("trickyTowers.dark", next ? "1" : "0");
-        document.documentElement.classList.toggle("dark", next);
+        applyDomTheme(next);
       }
       return { isDark: next };
     }),
 }));
 
+function applyDomTheme(dark: boolean) {
+  document.documentElement.classList.toggle("dark", dark);
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute("content", dark ? "#1a0a3d" : "#c8d8f8");
+}
+
 if (typeof window !== "undefined") {
-  document.documentElement.classList.toggle("dark", stored.dark);
+  applyDomTheme(stored.dark);
 }

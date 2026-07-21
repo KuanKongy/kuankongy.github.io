@@ -105,6 +105,8 @@ export interface StarsHandle {
   /** A Group containing all star sub-layers — added once to the scene. */
   points: THREE.Group;
   update: (elapsed: number) => void;
+  /** Brightness multiplier (1 = normal) — scroll-linked scene moments. */
+  setBoost: (v: number) => void;
   dispose: () => void;
 }
 
@@ -143,6 +145,7 @@ function buildLayer(spec: LayerSpec): StarLayer {
       uSprite: { value: sprite },
       uSize: { value: baseSize },
       uTwinkleSpeed: { value: twinkleSpeed },
+      uBoost: { value: 1 },
     },
     vertexShader: /* glsl */ `
       uniform float uTime;
@@ -162,11 +165,12 @@ function buildLayer(spec: LayerSpec): StarLayer {
     `,
     fragmentShader: /* glsl */ `
       uniform sampler2D uSprite;
+      uniform float uBoost;
       varying float vTwinkle;
       void main() {
         vec4 tex = texture2D(uSprite, gl_PointCoord);
         if (tex.a < 0.01) discard;
-        gl_FragColor = vec4(tex.rgb, tex.a * vTwinkle);
+        gl_FragColor = vec4(tex.rgb * uBoost, tex.a * vTwinkle);
       }
     `,
     transparent: true,
@@ -222,6 +226,9 @@ export function createStars(round = 800, fivePt = 90, sparkle = 50): StarsHandle
     points: root,
     update: (t) => {
       for (const l of layers) l.mat.uniforms.uTime.value = t;
+    },
+    setBoost: (v) => {
+      for (const l of layers) l.mat.uniforms.uBoost.value = v;
     },
     dispose: () => {
       for (const l of layers) {

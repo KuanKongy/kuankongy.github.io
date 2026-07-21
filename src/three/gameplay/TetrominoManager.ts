@@ -162,6 +162,29 @@ export class TetrominoManager {
     for (const p of [...this.pieces]) this.removePiece(p);
   }
 
+  /**
+   * Gently push idle (non-player) pieces away from a world-space point —
+   * the cursor-reactive effect in PORTFOLIO. Impulses only, on existing
+   * bodies; never spawns anything.
+   */
+  applyRepel(point: THREE.Vector3, radius: number, strength: number) {
+    const r2 = radius * radius;
+    for (const p of this.pieces) {
+      if (p.isPlayerOrigin) continue;
+      const t = p.body.translation();
+      const dx = t.x - point.x;
+      const dy = t.y - point.y;
+      const dz = t.z - point.z;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 > r2 || d2 < 1e-4) continue;
+      const d = Math.sqrt(d2);
+      const falloff = 1 - d / radius;
+      const s = (strength * falloff) / d;
+      // Damp the vertical component so pieces drift sideways, not upward.
+      p.body.applyImpulse({ x: dx * s, y: dy * s * 0.35, z: dz * s }, true);
+    }
+  }
+
   topPlayerY(): number {
     let max = -Infinity;
     for (const p of this.pieces) {

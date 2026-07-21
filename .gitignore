@@ -42,3 +42,7 @@ dist
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local design mocks
+image.png
+image2.png

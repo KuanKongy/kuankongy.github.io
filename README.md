@@ -194,3 +194,27 @@ The interactive game loop is **complete and playable end-to-end**: PORTFOLIO →
 
 - Visual style guide: `survival-full.png`.
 - Original portfolio source: [`KuanKongy/Portfolio`](https://github.com/KuanKongyPortfolio).
+
+---
+
+## Adding project media (screenshots & videos)
+
+Media is auto-discovered from `src/assets/projects/<slug>/` — drop files in, no code changes needed:
+
+```
+src/assets/projects/<slug>/
+  cover.webp            ← card image (falls back to 01.*)
+  01.webp, 02.webp, …   ← modal gallery, sorted by filename
+  demo.mp4              ← optional; if present it plays FIRST in the modal
+```
+
+Slugs: `tricky-towers-3d`, `onboardbuddy`, `studyflow`, `floowforge`, `ubcpss`,
+`feathersmcp`, `courseinsights`, `deeprecall`, `multiplayer-tetris`, `skribbl`,
+`geoshopper`, `pokedex`.
+
+- WebP preferred (`cwebp -q 82 in.png -o out.webp`); png/jpg also work.
+- Keep local videos under ~10 MB — long demos should stay on YouTube
+  (set `youtubeId` in `src/data/projects.ts` instead; a local `demo.mp4` wins
+  over YouTube if both exist).
+- Content lives in `src/data/` (`projects.ts`, `experience.ts`, `skills.ts`) —
+  render order is array order, so reordering is a data edit.

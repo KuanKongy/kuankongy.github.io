@@ -1,31 +1,26 @@
 import { useEffect } from "react";
 import HeroSection from "./sections/HeroSection";
 import AboutSection from "./sections/AboutSection";
-import LanguagesSection from "./sections/LanguagesSection";
-import ExperiencesSection from "./sections/ExperiencesSection";
+import SkillsSection from "./sections/SkillsSection";
+import ExperienceSection from "./sections/ExperienceSection";
 import ProjectsSection from "./sections/ProjectsSection";
 import ContactSection from "./sections/ContactSection";
 import Footer from "./sections/Footer";
 import { useGameStore } from "../store/gameStore";
+import { lockBodyScroll } from "../lib/scrollLock";
+import { useSceneDirector } from "../hooks/useSceneDirector";
 
 export default function PortfolioOverlay() {
   const phase = useGameStore((s) => s.phase);
   const visible = phase === "PORTFOLIO";
 
-  // Single source of truth for body scroll: we lock it whenever the portfolio
-  // is NOT visible (game/overlay phases) and unlock it whenever we're back on
-  // the portfolio. Always restore on cleanup so returning to the portfolio
-  // always re-enables scrolling.
+  useSceneDirector();
+
+  // Body scroll is locked whenever the portfolio is NOT visible (game/overlay
+  // phases). The refcounted lock composes with the project modal's lock.
   useEffect(() => {
-    if (visible) {
-      document.body.style.overflow = "";
-      return () => {};
-    }
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
+    if (visible) return;
+    return lockBodyScroll();
   }, [visible]);
 
   return (
@@ -35,12 +30,12 @@ export default function PortfolioOverlay() {
       }`}
       aria-hidden={!visible}
     >
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-16 pt-24 md:px-8 lg:px-12">
+      <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-24 px-5 pb-20 pt-24 md:gap-32 md:px-10 lg:px-14">
         <HeroSection />
         <AboutSection />
-        <LanguagesSection />
-        <ExperiencesSection />
         <ProjectsSection />
+        <ExperienceSection />
+        <SkillsSection />
         <ContactSection />
       </div>
       {visible && <Footer />}

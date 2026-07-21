@@ -27,6 +27,12 @@ import { PlayerPiece } from "./gameplay/PlayerPiece";
 import { FallingRay } from "./gameplay/FallingRay";
 import { ScoreManager } from "./gameplay/ScoreManager";
 import { createPostProcessing, type PostHandle } from "./effects/PostProcessing";
+import {
+  createShootingStars,
+  type ShootingStarsHandle,
+} from "./scene/ShootingStars";
+import { setDirector, type SceneDirector } from "./sceneBridge";
+import { prefersReducedMotion } from "../lib/motion";
 import { useGameStore, type GamePhase } from "../store/gameStore";
 
 export type EngineStatus =
@@ -39,7 +45,7 @@ function pickRandomKey(): TetrominoKey {
   return TETROMINO_KEYS[Math.floor(Math.random() * TETROMINO_KEYS.length)];
 }
 
-export class GameEngine {
+export class GameEngine implements SceneDirector {
   private canvas: HTMLCanvasElement;
   private renderer: THREE.WebGLRenderer | null = null;
   private scene: THREE.Scene | null = null;
@@ -80,6 +86,18 @@ export class GameEngine {
   private currentPhase: GamePhase = "PORTFOLIO";
 
   private followVec = new THREE.Vector3();
+
+  // Portfolio-only scene director state (scroll moments + cursor repel).
+  private shootingStars: ShootingStarsHandle | null = null;
+  private pointerNdc = new THREE.Vector2();
+  private hasPointer = false;
+  private scrollT = 0;
+  private starPulse = 0;
+  private repelAccum = 0;
+  private repelRaycaster = new THREE.Raycaster();
+  private repelPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+  private repelPoint = new THREE.Vector3();
+  private reducedMotion = false;
 
   private boundResize = () => this.resize();
   private boundVisibility = () => {
@@ -254,6 +272,8 @@ export class GameEngine {
     this.scene.add(this.sun.group);
     this.stars = createStars(900, 110, 60);
     this.scene.add(this.stars.points);
+    this.shootingStars = createShootingStars();
+    this.scene.add(this.shootingStars.group);
     this.clouds = createClouds(28);
     this.scene.add(this.clouds.group);
 
@@ -312,9 +332,59 @@ export class GameEngine {
     });
     this.currentPhase = useGameStore.getState().phase;
 
+    this.reducedMotion = prefersReducedMotion();
+    setDirector(this);
+
     this.clock.start();
     this.tick();
     this.setStatus({ phase: "ready" });
+  }
+
+  // --- SceneDirector (portfolio DOM → 3D scene) ---------------------------
+
+  setPointer(nx: number, ny: number) {
+    this.pointerNdc.set(nx, ny);
+    this.hasPointer = true;
+  }
+
+  setScrollProgress(t: number) {
+    this.scrollT = THREE.MathUtils.clamp(t, 0, 1);
+  }
+
+  triggerMoment(name: "projects" | "skills") {
+    if (this.currentPhase !== "PORTFOLIO" || this.reducedMotion) return;
+    if (name === "projects") {
+      this.shootingStars?.burst(3);
+    } else {
+      // Skills: a slow star-glow swell (3s envelope, applied in tick()).
+      this.starPulse = 3;
+    }
+  }
+
+  /** Cursor-reactive blocks + scroll-linked star glow. PORTFOLIO only. */
+  private updatePortfolioEffects(dt: number) {
+    this.shootingStars?.update(dt);
+    if (this.currentPhase !== "PORTFOLIO") return;
+
+    if (this.stars) {
+      if (this.starPulse > 0) this.starPulse = Math.max(0, this.starPulse - dt);
+      const pulse =
+        this.starPulse > 0 ? Math.sin(Math.PI * (1 - this.starPulse / 3)) : 0;
+      this.stars.setBoost(1 + 0.25 * this.scrollT + 0.5 * pulse);
+    }
+
+    if (this.hasPointer && !this.reducedMotion && this.camera) {
+      this.repelAccum += dt;
+      if (this.repelAccum >= 0.12) {
+        this.repelAccum = 0;
+        this.repelRaycaster.setFromCamera(this.pointerNdc, this.camera);
+        if (
+          this.repelRaycaster.ray.intersectPlane(this.repelPlane, this.repelPoint)
+        ) {
+          this.spawner?.applyRepel(this.repelPoint, 7, 2.6);
+        }
+      }
+    }
   }
 
   private async onPhaseChange(phase: GamePhase) {
@@ -481,6 +551,7 @@ export class GameEngine {
     this.moon?.update(t);
     this.sun?.update(t);
     this.stars?.update(t);
+    this.updatePortfolioEffects(dt);
     this.clouds?.update(t);
     this.castle?.update(t);
     this.wizard?.update(t);
@@ -532,6 +603,7 @@ export class GameEngine {
   }
 
   private teardown() {
+    setDirector(null);
     if (this.rafId !== null) {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
@@ -566,6 +638,8 @@ export class GameEngine {
     this.moon?.dispose();
     this.sun?.dispose();
     this.stars?.dispose();
+    this.shootingStars?.dispose();
+    this.shootingStars = null;
     this.clouds?.dispose();
     this.mountains?.dispose();
     this.castle?.dispose();

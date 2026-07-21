@@ -1,27 +1,44 @@
 <!doctype html>
-<html lang="en" class="dark" style="background-color: #06030f">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1a0a3d" />
-    <title>Nam's Portfolio · Tricky Towers 3D</title>
+    <title>Nam Le — Software Developer</title>
     <meta
       name="description"
-      content="Nam Le's portfolio rendered inside a Tricky Towers 3D night-sky world. Built with Three.js, Rapier and React."
+      content="Nam Le is a UBC Computer Science student building full-stack systems, cloud infrastructure, and games. Portfolio rendered inside a playable Tricky Towers 3D night-sky world."
     />
+    <link rel="canonical" href="https://kuankongy.github.io/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Nam Le — Software Developer" />
+    <meta
+      property="og:description"
+      content="Full-stack developer and UBC CS student. Portfolio rendered inside a playable Tricky Towers 3D night-sky world."
+    />
+    <meta property="og:url" content="https://kuankongy.github.io/" />
+    <meta property="og:image" content="https://kuankongy.github.io/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nam Le — Software Developer" />
+    <meta
+      name="twitter:description"
+      content="Full-stack developer and UBC CS student. Portfolio rendered inside a playable Tricky Towers 3D night-sky world."
+    />
+    <meta name="twitter:image" content="https://kuankongy.github.io/og.png" />
+    <style>
+      html.dark { background-color: #06030f; }
+      html:not(.dark) { background-color: #dbe7fb; }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto:wght@300;400;500;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&family=Press+Start+2P&display=swap"
       rel="stylesheet"
     />
   </head>
-  <body
-    class="bg-[#06030f] text-white"
-    style="background-color: #06030f"
-  >
-    <div id="root" style="background-color: #06030f"></div>
+  <body>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -45,7 +45,7 @@ export default function ThreeCanvas() {
         style={{ display: "block", background: "transparent" }}
       />
       {status.phase === "error" && (
-        <div className="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center pt-20">
+        <div className="dark pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center pt-20">
           <div className="pointer-events-auto frosted max-w-xl px-5 py-3 text-sm text-rose-200">
             <strong className="mr-2 font-arcade text-xs text-rose-300">
               [SCENE]
