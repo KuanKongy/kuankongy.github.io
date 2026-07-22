@@ -65,6 +65,7 @@ export const projects: Project[] = [
         kind: "github",
       },
     ],
+    youtubeId: "aPoNS8PYZ5A",
   },
   {
     slug: "studyflow",
@@ -174,6 +175,7 @@ export const projects: Project[] = [
         kind: "npm",
       },
     ],
+    youtubeId: "FojJoHIucKM",
   },
   {
     slug: "courseinsights",
@@ -376,7 +378,7 @@ export const projects: Project[] = [
     blurb:
       "My previous portfolio site — a responsive Next.js build, the predecessor of the night-sky world you're in now.",
     description:
-      "My first portfolio website, designed and built from scratch with Next.js, TypeScript, and Tailwind CSS. A responsive single-page site showcasing my skills, experience, and projects, with resume and social links. It served as the foundation this current 3D night-sky portfolio grew out of, and remains live at namkhanhle.dev.",
+      "My first portfolio website, designed and built from scratch with Next.js, TypeScript, and Tailwind CSS. A responsive single-page site showcasing my skills, experience, and projects, with resume and social links. It served as the foundation this current 3D night-sky portfolio grew out of, and is still online at namkhanhle.dev/Portfolio.",
     tech: ["TypeScript", "Next.js", "React", "Tailwind CSS"],
     links: [
       {
@@ -384,7 +386,7 @@ export const projects: Project[] = [
         url: "https://github.com/KuanKongy/Portfolio",
         kind: "github",
       },
-      { label: "Live", url: "https://namkhanhle.dev", kind: "live" },
+      { label: "Live", url: "https://namkhanhle.dev/Portfolio/", kind: "live" },
     ],
   },
 ];

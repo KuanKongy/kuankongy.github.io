@@ -210,9 +210,11 @@ src/assets/projects/<slug>/
 
 Slugs: `tricky-towers-3d`, `onboardbuddy`, `studyflow`, `floowforge`, `ubcpss`,
 `feathersmcp`, `courseinsights`, `deeprecall`, `multiplayer-tetris`, `skribbl`,
-`geoshopper`, `pokedex`.
+`geoshopper`, `pokedex`, `portfolio`.
 
-- WebP preferred (`cwebp -q 82 in.png -o out.webp`); png/jpg also work.
+- WebP preferred; png/jpg also work. For full-page screenshots, cap the width
+  and lean on quality so text stays crisp: `cwebp -resize 1920 0 -q 88 in.png -o out.webp`
+  (each lands ~40–90 KB). Drop `-resize` for smaller source images.
 - Keep local videos under ~10 MB — long demos should stay on YouTube
   (set `youtubeId` in `src/data/projects.ts` instead; a local `demo.mp4` wins
   over YouTube if both exist).

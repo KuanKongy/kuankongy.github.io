@@ -131,6 +131,12 @@ export const skills: SkillCategory[] = [
         brandColorLight: "#0284c7",
       },
       {
+        name: "Three.js",
+        icon: SiThreedotjs,
+        brandColor: "#d1d5db",
+        brandColorLight: "#1f2937",
+      },
+      {
         name: "ShadCN",
         icon: SiShadcnui,
         brandColor: "#cbd5e1",
@@ -156,12 +162,6 @@ export const skills: SkillCategory[] = [
       },
     ],
     overflow: [
-      {
-        name: "Three.js",
-        icon: SiThreedotjs,
-        brandColor: "#d1d5db",
-        brandColorLight: "#1f2937",
-      },
       {
         name: "GSAP",
         icon: SiGreensock,
@@ -309,6 +309,18 @@ export const skills: SkillCategory[] = [
         brandColor: "#a586e8",
         brandColorLight: "#430098",
       },
+      {
+        name: "Cloudflare",
+        icon: SiCloudflare,
+        brandColor: "#f38020",
+        brandColorLight: "#c2570b",
+      },
+      {
+        name: "Jenkins",
+        icon: SiJenkins,
+        brandColor: "#d97a6c",
+        brandColorLight: "#d24939",
+      },
     ],
     overflow: [
       {
@@ -317,18 +329,11 @@ export const skills: SkillCategory[] = [
         brandColor: "#6ba7ff",
         brandColorLight: "#1d4ed8",
       },
-      { name: "Cloudflare", icon: SiCloudflare, brandColor: "#f38020", brandColorLight: "#c2570b" },
       {
         name: "Ansible",
         icon: SiAnsible,
         brandColor: "#e8e8e8",
         brandColorLight: "#1f2937",
-      },
-      {
-        name: "Jenkins",
-        icon: SiJenkins,
-        brandColor: "#d97a6c",
-        brandColorLight: "#d24939",
       },
       { name: "Grafana", icon: SiGrafana, brandColor: "#f46800" },
       { name: "Prometheus", icon: SiPrometheus, brandColor: "#e6522c" },
