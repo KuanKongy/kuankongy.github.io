@@ -8,27 +8,38 @@
 --------------------------------------------------------------------------- */
 :root {
   --ink: 30 24 58; /* #1e183a deep indigo */
+  --heading-ink: #5b21b6; /* deep violet titles — livelier than gray-black */
   --page-bg: #dbe7fb;
-  --glass-bg: rgba(255, 255, 255, 0.62);
-  --glass-bg-soft: rgba(255, 255, 255, 0.45);
+  /* Opaque enough that dark scene objects (castle tower) don't bleed
+     through as muddy smears — whiter also reads cleaner, not grayer. */
+  --glass-bg: rgba(255, 255, 255, 0.86);
+  --glass-bg-soft: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(109, 40, 217, 0.2);
   --glass-border-soft: rgba(30, 24, 58, 0.14);
   --glass-shadow:
     0 18px 48px -16px rgba(74, 42, 154, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.35) inset;
-  --line-strong: rgba(30, 24, 58, 0.35);
+  --line-strong: rgba(12, 10, 24, 0.75); /* light theme = black, not gray */
   --accent-strong: #a21caf; /* accessible accent text on light glass */
   --accent-soft: #6d28d9;
   --glow: rgba(162, 28, 175, 0.28);
   --grad-from: #6d28d9;
   --grad-mid: #a21caf;
   --grad-to: #6d28d9;
+  /* Tight white "coating" hugging the glyphs — reads over busy day-sky
+     content without looking like a blurry halo. */
+  --heading-glow:
+    0 0 1px rgba(255, 255, 255, 0.95),
+    0 0 3px rgba(255, 255, 255, 0.9),
+    0 0 6px rgba(255, 255, 255, 0.85),
+    0 1px 12px rgba(240, 245, 255, 0.75);
   --scrollbar-thumb: rgba(109, 40, 217, 0.35);
   --scrollbar-thumb-hover: rgba(109, 40, 217, 0.55);
 }
 
 .dark {
   --ink: 244 240 255; /* #f4f0ff */
+  --heading-ink: rgb(var(--ink));
   --page-bg: #06030f;
   --glass-bg: rgba(15, 5, 40, 0.55);
   --glass-bg-soft: rgba(15, 5, 40, 0.35);
@@ -44,6 +55,9 @@
   --grad-from: #a78bfa;
   --grad-mid: #e879f9;
   --grad-to: #a78bfa;
+  --heading-glow:
+    0 1px 3px rgba(6, 3, 15, 0.9),
+    0 0 16px rgba(6, 3, 15, 0.7);
   --scrollbar-thumb: rgba(125, 80, 220, 0.5);
   --scrollbar-thumb-hover: rgba(155, 100, 255, 0.7);
 }
@@ -142,7 +156,7 @@ body {
     font-family: "JetBrains Mono", ui-monospace, monospace;
     font-size: 0.875rem;
     font-weight: 500;
-    color: rgb(var(--ink) / 0.9);
+    color: rgb(var(--ink) / 0.95);
     border: 1px solid var(--line-strong);
     transition: transform 200ms ease, border-color 200ms ease,
       box-shadow 200ms ease, color 200ms ease;
@@ -164,10 +178,20 @@ body {
     transform: translateY(-2px);
   }
 
-  /* Skill pill — brand-colored glow on hover, tint set via --glow-c. */
+  /* Skill pill — brand-colored glow on hover. The active tint (--glow-c)
+     resolves per theme: --pill-light on light, --pill-dark on .dark. */
   .skill-pill {
+    --glow-c: var(--pill-light);
     transition: box-shadow 0.2s ease, border-color 0.2s ease,
       transform 0.2s ease;
+  }
+
+  .dark .skill-pill {
+    --glow-c: var(--pill-dark);
+  }
+
+  .skill-pill-icon {
+    color: var(--glow-c);
   }
 
   .skill-pill:hover {
@@ -201,27 +225,76 @@ body {
     border-radius: 9999px;
     border-width: 2px;
     border-style: solid;
-    background: linear-gradient(
-      120deg,
-      rgba(124, 58, 237, 0.65),
-      rgba(217, 70, 239, 0.65),
-      rgba(56, 189, 248, 0.55)
-    );
+    /* Opaque multicolor gradient (magenta→cyan→orange, the original's
+       character) — opaque so it never washes out over glass. White text
+       belongs to the dark theme; the light theme overrides below. */
+    background: linear-gradient(120deg, #c026d3, #0891b2, #ea580c);
     background-size: 200% 200%;
     animation: play-pulse 4s linear infinite, play-shine 8s ease-in-out infinite;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     box-shadow:
-      0 0 24px rgba(167, 139, 250, 0.55),
-      0 0 8px rgba(217, 70, 239, 0.35) inset;
+      0 0 24px rgba(204, 0, 255, 0.5),
+      0 0 8px rgba(0, 229, 255, 0.35) inset;
     transition: transform 200ms ease, box-shadow 200ms ease;
   }
 
   .play-btn:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow:
-      0 0 36px rgba(217, 70, 239, 0.7),
-      0 0 12px rgba(167, 139, 250, 0.55) inset;
+      0 0 36px rgba(204, 0, 255, 0.65),
+      0 0 12px rgba(0, 229, 255, 0.5) inset;
   }
+
+  /* Light theme: dark ink label + dark border on brighter arcade stops
+     (all ≥6:1 under ink) — white text/coating and the rainbow border
+     pulse belong to the night look. play-shine stays. */
+  :root:not(.dark) .play-btn {
+    color: rgb(var(--ink));
+    background-image: linear-gradient(120deg, #e879f9, #34d0e0, #ffb03c);
+    text-shadow: none;
+    border-color: var(--line-strong);
+    animation: play-shine 8s ease-in-out infinite;
+  }
+}
+
+/* Corner vignette continued over the DOM layer — the 3D scene's shader
+   vignette stops at the canvas, so the navbar's glass hid the top corners.
+   Sits above the nav (z-30), below the game overlays; the top strip only,
+   so scrolled content lower down is never darkened. */
+.nav-vignette {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  pointer-events: none;
+  z-index: 35;
+  background:
+    radial-gradient(
+      circle 400px at -50px -70px,
+      rgba(0, 0, 0, 0.78),
+      rgba(0, 0, 0, 0) 72%
+    ),
+    radial-gradient(
+      circle 400px at calc(100% + 50px) -70px,
+      rgba(0, 0, 0, 0.78),
+      rgba(0, 0, 0, 0) 72%
+    );
+}
+
+/* Light theme keeps the corners but eases them, matching the 3D scene's
+   reduced day/evening vignette. */
+:root:not(.dark) .nav-vignette {
+  opacity: 0.75;
+}
+
+/* Bright arcade colors that must stay authentic (true piece colors) get a
+   tight dark outline on light glass; no-op in dark mode. */
+:root:not(.dark) .arcade-coat {
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes play-shine {

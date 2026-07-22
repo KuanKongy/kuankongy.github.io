@@ -10,17 +10,36 @@ export type GamePhase =
 
 export type GameMode = "SURVIVAL" | "ENDLESS";
 
-export type BlockSkin = "CLASSIC" | "CANDY" | "GEM" | "JEWEL" | "GLOSSY";
+// Naming history: GLOSSY is the old candy-sticker look renamed; SMOOTH is
+// the old clearcoat "glossy"; CANDY/GALAXY are the Tricky-Towers-style
+// brick packs (candy.png / galaxy.png references).
+export type BlockSkin =
+  | "CLASSIC"
+  | "CANDY"
+  | "GALAXY"
+  | "GEM"
+  | "NEON"
+  | "JEWEL"
+  | "GLOSSY"
+  | "SMOOTH";
 
 export const BLOCK_SKINS: BlockSkin[] = [
-  "CANDY",
   "GEM",
+  "CANDY",
+  "GALAXY",
+  "NEON",
   "JEWEL",
   "GLOSSY",
+  "SMOOTH",
   "CLASSIC",
 ];
 
 export type CharacterId = "OWL" | "WIZARD" | "OCTOPUS";
+
+export const CHARACTERS: CharacterId[] = ["OWL", "WIZARD", "OCTOPUS"];
+
+/** Game-arena time of day, chosen in the lobby. */
+export type SceneTime = "NIGHT" | "DAY" | "EVENING";
 
 export interface GameState {
   phase: GamePhase;
@@ -74,6 +93,14 @@ export interface GameState {
 
   isDark: boolean;
   toggleDark: () => void;
+
+  /**
+   * Scene time of day, coupled two-way with the theme: NIGHT ⇔ dark,
+   * DAY/EVENING ⇔ light (DAY is the light default; EVENING is the warm
+   * variant). Picking a time switches the theme and vice versa.
+   */
+  sceneTime: SceneTime;
+  setSceneTime: (t: SceneTime) => void;
 }
 
 const STARTING_LIVES = 3;
@@ -84,27 +111,50 @@ const stored = (() => {
       hi: 0,
       dark: true,
       mode: "SURVIVAL" as GameMode,
-      skin: "CANDY" as BlockSkin,
+      skin: "GEM" as BlockSkin,
       character: "OWL" as CharacterId,
+      sceneTime: "NIGHT" as SceneTime,
     };
   const hi = Number(localStorage.getItem("trickyTowers.highScore") || "0");
   const dark = localStorage.getItem("trickyTowers.dark");
   const m = localStorage.getItem("trickyTowers.mode");
   const sk = localStorage.getItem("trickyTowers.blockSkin");
   const ch = localStorage.getItem("trickyTowers.character");
+  const st = localStorage.getItem("trickyTowers.sceneTime");
   // ?theme=light|dark overrides the saved preference for that visit.
+  // First visit (nothing saved) follows the OS theme; "no preference"
+  // systems land on night, which is the brand default. Must mirror the
+  // pre-paint inline script in index.html.
   const forced = new URLSearchParams(window.location.search).get("theme");
+  const isDark = forced
+    ? forced !== "light"
+    : dark === null
+      ? !window.matchMedia("(prefers-color-scheme: light)").matches
+      : dark === "1";
   return {
     hi: isNaN(hi) ? 0 : hi,
-    dark: forced ? forced !== "light" : dark === null ? true : dark === "1",
+    dark: isDark,
     mode: (m === "ENDLESS" ? "ENDLESS" : "SURVIVAL") as GameMode,
-    // Legacy "PREMIUM" (and anything unknown) falls back to CANDY.
-    skin: (sk === "CLASSIC" || sk === "GEM" || sk === "JEWEL" || sk === "GLOSSY"
+    // Saved skins are honored; anything unknown (or a new user) gets GEM.
+    skin: (sk === "CLASSIC" ||
+    sk === "CANDY" ||
+    sk === "GALAXY" ||
+    sk === "JEWEL" ||
+    sk === "GLOSSY" ||
+    sk === "SMOOTH" ||
+    sk === "NEON"
       ? sk
-      : "CANDY") as BlockSkin,
+      : "GEM") as BlockSkin,
     character: (ch === "WIZARD" || ch === "OCTOPUS"
       ? ch
       : "OWL") as CharacterId,
+    // Scene time is theme-coupled: dark is always NIGHT; light honors a
+    // saved EVENING, otherwise defaults to DAY.
+    sceneTime: (isDark
+      ? "NIGHT"
+      : st === "EVENING"
+        ? "EVENING"
+        : "DAY") as SceneTime,
   };
 })();
 
@@ -191,15 +241,31 @@ export const useGameStore = create<GameState>((set, get) => ({
   queuePendingPlay: () => set({ pendingPlayAfterLobby: true }),
   clearPendingPlay: () => set({ pendingPlayAfterLobby: false }),
 
+  sceneTime: stored.sceneTime,
+  setSceneTime: (t) => {
+    // NIGHT drags the theme dark; DAY/EVENING drag it light.
+    const dark = t === "NIGHT";
+    if (typeof window !== "undefined") {
+      localStorage.setItem("trickyTowers.sceneTime", t);
+      localStorage.setItem("trickyTowers.dark", dark ? "1" : "0");
+      applyDomTheme(dark);
+    }
+    set({ sceneTime: t, isDark: dark });
+  },
+
   isDark: stored.dark,
   toggleDark: () =>
     set((s) => {
       const next = !s.isDark;
+      // Theme drags the scene with it: dark → NIGHT, light → DAY (the
+      // light default — EVENING is only ever picked explicitly).
+      const time: SceneTime = next ? "NIGHT" : "DAY";
       if (typeof window !== "undefined") {
         localStorage.setItem("trickyTowers.dark", next ? "1" : "0");
+        localStorage.setItem("trickyTowers.sceneTime", time);
         applyDomTheme(next);
       }
-      return { isDark: next };
+      return { isDark: next, sceneTime: time };
     }),
 }));
 

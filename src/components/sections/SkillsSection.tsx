@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { FaChevronDown } from "react-icons/fa";
 import { skills } from "../../data/skills";
 import type { AccentKey, SkillCategory, SkillItem } from "../../data/types";
 import SectionHeading from "../ui/SectionHeading";
@@ -17,14 +18,14 @@ function SkillPill({ item }: { item: SkillItem }) {
   return (
     <span
       className="skill-pill inline-flex items-center gap-2 rounded-lg border border-[color:var(--glass-border-soft)] bg-ink/5 px-3 py-1.5 font-mono text-xs text-ink/80 dark:bg-white/5"
-      style={{ "--glow-c": item.brandColor } as CSSProperties}
+      style={
+        {
+          "--pill-dark": item.brandColor,
+          "--pill-light": item.brandColorLight ?? item.brandColor,
+        } as CSSProperties
+      }
     >
-      <Icon
-        size={15}
-        style={{ color: item.brandColor }}
-        className="opacity-80"
-        aria-hidden
-      />
+      <Icon size={15} className="skill-pill-icon opacity-90" aria-hidden />
       {item.name}
     </span>
   );
@@ -32,8 +33,12 @@ function SkillPill({ item }: { item: SkillItem }) {
 
 function CategoryCard({ category }: { category: SkillCategory }) {
   const Icon = category.icon;
+  const overflow = category.overflow ?? [];
   return (
-    <div className="frosted flex h-full flex-col p-5">
+    <div
+      className="frosted group flex h-full flex-col p-5 hover-lift hover:border-[color:var(--glass-border)] hover:shadow-[0_10px_36px_-14px_var(--glow)]"
+      tabIndex={overflow.length > 0 ? 0 : undefined}
+    >
       <div className="flex items-center gap-2.5">
         <Icon
           size={18}
@@ -49,11 +54,31 @@ function CategoryCard({ category }: { category: SkillCategory }) {
           ACCENT_BAR[category.accent]
         }`}
       />
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap content-start gap-2">
         {category.items.map((item) => (
           <SkillPill key={item.name} item={item} />
         ))}
       </div>
+      {overflow.length > 0 && (
+        <>
+          {/* Desktop (xl) keeps these pills tucked away; hovering (or
+              keyboard-focusing) the card eases the max-height open and the
+              other cards in the same grid row stretch along with it.
+              Mobile and tablet always show everything. */}
+          <div className="xl:max-h-0 xl:overflow-hidden xl:transition-[max-height] xl:duration-500 xl:ease-out xl:group-hover:max-h-[320px] xl:group-focus-within:max-h-[320px]">
+            <div className="flex flex-wrap content-start gap-2 pt-2">
+              {overflow.map((item) => (
+                <SkillPill key={item.name} item={item} />
+              ))}
+            </div>
+          </div>
+          <FaChevronDown
+            size={12}
+            aria-hidden
+            className="mx-auto mt-2 hidden shrink-0 text-ink/40 transition-opacity duration-300 group-hover:opacity-0 group-focus-within:opacity-0 xl:block"
+          />
+        </>
+      )}
     </div>
   );
 }

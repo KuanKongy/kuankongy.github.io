@@ -1,3 +1,4 @@
+import { FaRegFileAlt } from "react-icons/fa";
 import { useGameStore } from "../../store/gameStore";
 
 function TetrisIcon() {
@@ -29,17 +30,21 @@ export default function HeroSection() {
       {/* Small glass intro card on the left — the castle stays visible. */}
       <div className="frosted w-full max-w-[34rem] px-6 py-10 md:px-10">
         <p className="mb-3 font-arcade text-[10px] tracking-widest text-[color:var(--accent-strong)] md:text-xs">
-          // PORTFOLIO · TRICKY TOWERS 3D
+          // PORTFOLIO
         </p>
-        <h1 className="font-display text-4xl font-extrabold leading-tight md:text-5xl">
-          <span className="block text-ink">Hey, I&apos;m</span>
-          <span className="grad-text block pb-1">Nam Khanh</span>
+        <h1 className="font-display leading-tight">
+          <span className="block text-2xl font-bold tracking-tight text-ink md:text-3xl">
+            Hey, I&apos;m
+          </span>
+          <span className="grad-text block pb-1 text-4xl font-extrabold tracking-tight md:text-5xl">
+            Nam Khanh
+          </span>
         </h1>
         <p className="animated mt-2 font-mono text-lg text-ink/90 md:text-xl">
           <span className="animated-info">
             <span className="animated-item">a Full-Stack Developer</span>
             <span className="animated-item">a CS Student @ UBC</span>
-            <span className="animated-item">a Problem Solver</span>
+            <span className="animated-item">a DevOps Engineer</span>
           </span>
         </p>
         <p className="mt-5 max-w-2xl text-base text-ink/80 md:text-lg">
@@ -61,9 +66,12 @@ export default function HeroSection() {
             href="https://drive.google.com/file/d/14oTBXBsqk1k9xeKrHCXZTeOLP-AtxBF4/view?usp=sharing"
             target="_blank"
             rel="noreferrer"
-            className="btn-ghost"
+            className="hover-lift group relative inline-flex rounded-full bg-gradient-to-r from-accent-violet to-accent-fuchsia p-[2px] shadow-[0_0_16px_rgba(167,139,250,0.25)] hover:shadow-[0_0_26px_rgba(217,70,239,0.5)]"
           >
-            View Resume
+            <span className="flex items-center gap-2 rounded-full bg-[color:var(--page-bg)] px-6 py-2.5 font-mono text-sm font-semibold text-ink transition duration-200 group-hover:bg-transparent group-hover:text-white">
+              <FaRegFileAlt size={15} aria-hidden />
+              View Resume
+            </span>
           </a>
         </div>
       </div>

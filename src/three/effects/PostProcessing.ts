@@ -9,6 +9,10 @@ const VignetteShader = {
   uniforms: {
     tDiffuse: { value: null as THREE.Texture | null },
     uStrength: { value: 1.0 },
+    // How much of the vignette applies at all: 1 = full (night), lower
+    // values fade it toward "no vignette" — the black corners that hide in
+    // the night sky read as a dirty bezel over the bright day sky.
+    uAmount: { value: 1.0 },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -20,12 +24,14 @@ const VignetteShader = {
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
     uniform float uStrength;
+    uniform float uAmount;
     varying vec2 vUv;
     void main() {
       vec4 color = texture2D(tDiffuse, vUv);
       vec2 uv = vUv * 2.0 - 1.0;
       float vignette = 1.0 - dot(uv * vec2(0.7, 0.9), uv * vec2(0.7, 0.9));
-      vignette = clamp(pow(vignette, uStrength), 0.0, 1.0);
+      vignette = pow(clamp(vignette, 0.0, 1.0), uStrength);
+      vignette = mix(1.0, vignette, uAmount);
       gl_FragColor = vec4(color.rgb * vignette, color.a);
     }
   `,
@@ -34,6 +40,8 @@ const VignetteShader = {
 export interface PostHandle {
   composer: EffectComposer;
   setSize: (w: number, h: number) => void;
+  /** 1 = full night vignette, 0 = none. Day mode runs it faded. */
+  setVignette: (amount: number) => void;
   dispose: () => void;
 }
 
@@ -73,6 +81,9 @@ export function createPostProcessing(
     setSize: (w, h) => {
       composer.setSize(w, h);
       if (bloomPass) bloomPass.setSize(w, h);
+    },
+    setVignette: (amount) => {
+      vignettePass.uniforms.uAmount.value = amount;
     },
     dispose: () => {
       composer.passes.forEach((p) => {

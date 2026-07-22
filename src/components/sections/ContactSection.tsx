@@ -24,7 +24,12 @@ export default function ContactSection() {
 
   return (
     <section id="contact" className="scroll-mt-24">
-      <SectionHeading kicker="// say hi" title="Let's Stay in Touch" align="center" />
+      <SectionHeading
+        kicker="// say hi"
+        title="Let's Stay in Touch"
+        align="center"
+        kickerClassName="text-sm font-bold md:text-base"
+      />
       <Reveal>
         <div className="relative mx-auto w-full max-w-2xl">
           <div
@@ -64,8 +69,8 @@ export default function ContactSection() {
             <span aria-live="polite" className="sr-only">
               {copied ? "Email address copied to clipboard" : ""}
             </span>
-            <p className="mt-4 font-mono text-xs text-ink/55">
-              click to copy · or{" "}
+            <p className="mt-4 font-mono text-xs text-ink/70">
+              click to copy or{" "}
               <a
                 href={`mailto:${EMAIL}`}
                 className="text-[color:var(--accent-strong)] underline-offset-4 hover:underline"

@@ -136,6 +136,11 @@ export class PlayerPiece {
     return this.locked;
   }
 
+  /** True once the piece has fallen past the arena into the void. */
+  hasFallenOut(): boolean {
+    return !this.locked && this.currentY < PLAYER.loseY;
+  }
+
   /** Compute min/max rotated-X offsets at the given roll. */
   private xExtents(roll: number): { min: number; max: number } {
     const cosR = Math.cos(roll);
@@ -259,9 +264,11 @@ export class PlayerPiece {
     // ambience); the lock sparkle burst in lockNow() is the only piece FX.
 
     this.fallingRay.update(
+      this.pw,
       new THREE.Vector3(this.currentX, this.currentY, this.spawnZ),
       this.currentRoll,
       this.colliderOffsets,
+      this.excludeColliders,
     );
 
     // Skip the lock check during rotation animation (cell faces aren't world
@@ -280,6 +287,9 @@ export class PlayerPiece {
           { x: cellWX + dx, y: cellBottomY, z: this.spawnZ + dz },
           { x: 0, y: -1, z: 0 },
         );
+        // Sensors (the invisible void detector) are NOT ground — without
+        // this filter a piece falling into the void "landed" on the sensor
+        // and scored a lock.
         const hit = this.pw.world.castRay(
           ray,
           PLAYER.contactThreshold + 0.04,
@@ -288,7 +298,7 @@ export class PlayerPiece {
           undefined,
           undefined,
           undefined,
-          (col) => !this.excludeColliders.has(col.handle),
+          (col) => !this.excludeColliders.has(col.handle) && !col.isSensor(),
         );
         if (hit && hit.timeOfImpact <= PLAYER.contactThreshold + 0.04) {
           touching = true;

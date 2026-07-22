@@ -13,7 +13,7 @@ export function createSky(): THREE.Mesh {
   const material = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
-    // IMPORTANT: clone the palette colors. `applyVisualTheme` mutates these
+    // IMPORTANT: clone the palette colors. `applyVisualScene` mutates these
     // via `.copy(...)` to switch between night/day; if we passed the shared
     // palette references the FIRST switch would also overwrite PALETTE itself
     // and any subsequent switch back would no longer find the original

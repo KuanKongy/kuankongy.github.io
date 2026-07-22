@@ -50,8 +50,10 @@ export interface ExperienceEntry {
 export interface SkillItem {
   name: string;
   icon: IconType;
-  /** Brand hex — drives the pill's hover glow and icon tint. */
+  /** Brand hex for DARK theme — drives the pill's hover glow and icon tint. */
   brandColor: string;
+  /** Darker variant for the light theme (falls back to brandColor). */
+  brandColorLight?: string;
 }
 
 export interface SkillCategory {
@@ -60,4 +62,10 @@ export interface SkillCategory {
   icon: IconType;
   accent: AccentKey;
   items: SkillItem[];
+  /**
+   * Pills hidden behind the desktop (xl) hover-expand: `items` always
+   * show, `overflow` eases open when the card is hovered/focused and the
+   * whole grid row stretches with it. Mobile always shows everything.
+   */
+  overflow?: SkillItem[];
 }

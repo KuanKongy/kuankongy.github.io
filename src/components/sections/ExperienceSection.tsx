@@ -9,7 +9,12 @@ export default function ExperienceSection() {
       {/* Legacy anchor — old /#experiences links still land here. */}
       <span id="experiences" aria-hidden />
       <SectionHeading kicker="// where I've worked" title="Experience" />
-      <div className="flex flex-col gap-4 border-l-2 border-accent-violet/30 pl-4 md:pl-8">
+      <div className="relative flex flex-col gap-6">
+        {/* Timeline spine — bubbles (at left-6 centers) sit on this line. */}
+        <span
+          aria-hidden
+          className="absolute bottom-8 left-6 top-8 w-[3px] -translate-x-1/2 rounded-full bg-accent-violetDeep dark:bg-accent-violet"
+        />
         {experience.map((e, i) => (
           <Reveal key={e.id} delay={i * 80}>
             <ExperienceRow entry={e} />

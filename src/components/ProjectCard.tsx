@@ -1,20 +1,9 @@
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa";
-import type { Project, ProjectCategory } from "../data/types";
+import type { Project } from "../data/types";
 import type { MediaSet } from "../lib/projectMedia";
+import { CATEGORY_META } from "../lib/categoryMeta";
 import Tag from "./ui/Tag";
-import type { TagAccent } from "./ui/Tag";
 import SparkleStar from "./ui/SparkleStar";
-
-export const CATEGORY_META: Record<
-  ProjectCategory,
-  { label: string; accent: TagAccent }
-> = {
-  academic: { label: "Academic", accent: "cyan" },
-  personal: { label: "Personal", accent: "violet" },
-  hackathon: { label: "Hackathon", accent: "gold" },
-};
-
-const MAX_CARD_TAGS = 4;
 
 interface ProjectCardProps {
   project: Project;
@@ -30,7 +19,6 @@ export default function ProjectCard({
   const category = CATEGORY_META[project.category];
   const github = project.links.find((l) => l.kind === "github");
   const live = project.links.find((l) => l.kind === "live" || l.kind === "npm");
-  const extraTags = project.tech.length - MAX_CARD_TAGS;
 
   return (
     <article className="frosted-soft group relative flex h-full flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-accent-violet/40 hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
@@ -75,10 +63,9 @@ export default function ProjectCard({
         <p className="mt-2 line-clamp-2 text-sm text-ink/75">{project.blurb}</p>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {project.tech.slice(0, MAX_CARD_TAGS).map((t) => (
+          {project.tech.map((t) => (
             <Tag key={t}>{t}</Tag>
           ))}
-          {extraTags > 0 && <Tag>+{extraTags}</Tag>}
         </div>
 
         <div className="mt-auto flex items-center gap-2 pt-5">

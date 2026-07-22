@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { FaGithub, FaExternalLinkAlt, FaNpm } from "react-icons/fa";
 import Modal from "./ui/Modal";
 import Tag from "./ui/Tag";
-import { CATEGORY_META } from "./ProjectCard";
+import { CATEGORY_META } from "../lib/categoryMeta";
 import type { Project } from "../data/types";
 import type { MediaSet } from "../lib/projectMedia";
 

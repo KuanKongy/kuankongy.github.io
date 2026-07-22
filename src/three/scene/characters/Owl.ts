@@ -80,15 +80,6 @@ export function createOwl(): CharacterHandle {
   beak.rotation.x = Math.PI / 2 + 0.38;
   group.add(beak);
 
-  // Ear tufts poking out from under the hat brim.
-  const tuftGeo = new THREE.ConeGeometry(0.07, 0.24, 6);
-  for (const side of [-1, 1]) {
-    const tuft = new THREE.Mesh(tuftGeo, wingMat);
-    tuft.position.set(side * 0.3, 1.64, 0.05);
-    tuft.rotation.z = -side * 0.5;
-    group.add(tuft);
-  }
-
   // Hat — normal full cone + brim + contrast band.
   const hat = new THREE.Group();
   const hatCone = new THREE.Mesh(new THREE.ConeGeometry(0.45, 1.0, 14), hatMat);

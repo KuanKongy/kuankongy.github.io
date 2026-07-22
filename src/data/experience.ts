@@ -30,14 +30,14 @@ export const experience: ExperienceEntry[] = [
     orgInitials: "F",
     logo: feathersLogo,
     type: "open-source",
-    start: "2026",
-    dateLabel: "2026",
+    start: "Jan 2026",
+    end: "April 2026",
     bullets: [
       "Contributed to FeathersMCP, an MCP server that brings FeathersJS v6 documentation into AI assistants — published on npm as feathersjs-mcp.",
       "Worked in a team of five alongside the project maintainers through pull requests and code reviews.",
       "Helped ship live access to 47 documentation pages with source-linked citations and full-text search.",
     ],
-    tech: ["TypeScript", "Node.js", "MCP"],
+    tech: ["TypeScript", "Node.js", "MCP", "SQLite", "Cloudflare"],
     accent: "gold",
   },
   {

@@ -21,6 +21,10 @@ export interface MountainsHandle {
 const DAY_MOUNTAIN_FRONT = new THREE.Color("#9098a8");
 const DAY_MOUNTAIN_MID = new THREE.Color("#7a8094");
 const DAY_MOUNTAIN_DARK = new THREE.Color("#5e6478");
+/** Foot rocks: night-navy blends into the dark, day needs a lighter stone —
+ * left at the night colour they read as black specks on the day scene. */
+const NIGHT_ROCK = PALETTE.mountainDark.clone().offsetHSL(0, 0, 0.05);
+const DAY_ROCK = new THREE.Color("#9aa2b2");
 
 /**
  * One pine tree: trunk + exactly 2 stacked cones. `grayer=true` swaps the
@@ -78,7 +82,7 @@ function getHullVertices(geometry: THREE.BufferGeometry): Float32Array {
 
 type MountainShape = "voluminous" | "pointy" | "roundy" | "shoulder";
 
-type ColorTier = "front" | "mid" | "dark";
+type ColorTier = "front" | "mid" | "dark" | "rock";
 
 interface SideSpec {
   x: number;
@@ -209,9 +213,10 @@ function buildSideMountain(
 
   // ---- Decorations: rocks at the foot, trees on the slope. ----
   const rockMat = new THREE.MeshToonMaterial({
-    color: PALETTE.mountainDark.clone().offsetHSL(0, 0, 0.05),
-    emissive: PALETTE.mountainDark.clone().multiplyScalar(0.04),
+    color: NIGHT_ROCK.clone(),
+    emissive: NIGHT_ROCK.clone().multiplyScalar(0.06),
   });
+  matRefs.push({ mat: rockMat, tier: "rock" });
   for (let i = 0; i < spec.rockCount; i++) {
     const rs = 0.35 + rng() * 0.5;
     const rockGeo = new THREE.SphereGeometry(rs, 7, 6);
@@ -369,11 +374,13 @@ export function createMountains(): MountainsHandle {
     front: PALETTE.mountainFront,
     mid: PALETTE.mountainMid,
     dark: PALETTE.mountainDark,
+    rock: NIGHT_ROCK,
   };
   const tierToDay: Record<ColorTier, THREE.Color> = {
     front: DAY_MOUNTAIN_FRONT,
     mid: DAY_MOUNTAIN_MID,
     dark: DAY_MOUNTAIN_DARK,
+    rock: DAY_ROCK,
   };
 
   return {

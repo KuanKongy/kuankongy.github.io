@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { useGameStore } from "../store/gameStore";
 import { TETROMINO_COLORS } from "../three/constants";
-import { PiMoonFill, PiSun } from "react-icons/pi";
+import { PiMoonFill, PiSun, PiSunHorizon } from "react-icons/pi";
 import SkinCarousel from "./SkinCarousel";
+import CharacterCarousel from "./CharacterCarousel";
 
 function MiniPiece({ piece }: { piece: keyof typeof TETROMINO_COLORS | null }) {
   if (!piece) return null;
@@ -13,7 +14,7 @@ function MiniPiece({ piece }: { piece: keyof typeof TETROMINO_COLORS | null }) {
         className="inline-block h-3 w-3 rounded-sm"
         style={{ background: color, boxShadow: `0 0 6px ${color}99` }}
       />
-      <span className="font-arcade text-[10px]" style={{ color }}>
+      <span className="arcade-coat font-arcade text-[10px]" style={{ color }}>
         {piece}
       </span>
     </div>
@@ -27,13 +28,13 @@ export default function LobbyOverlay() {
   const highScore = useGameStore((s) => s.highScore);
   const mode = useGameStore((s) => s.mode);
   const setMode = useGameStore((s) => s.setMode);
-  const character = useGameStore((s) => s.character);
-  const setCharacter = useGameStore((s) => s.setCharacter);
   const pendingPlayAfterLobby = useGameStore((s) => s.pendingPlayAfterLobby);
   const queuePendingPlay = useGameStore((s) => s.queuePendingPlay);
   const clearPendingPlay = useGameStore((s) => s.clearPendingPlay);
   const isDark = useGameStore((s) => s.isDark);
   const toggleDark = useGameStore((s) => s.toggleDark);
+  const sceneTime = useGameStore((s) => s.sceneTime);
+  const setSceneTime = useGameStore((s) => s.setSceneTime);
 
   // If the user clicked "Start" during LOBBY_TRANSITION we queue it; once
   // WAITING is reached we automatically advance to PLAYING.
@@ -59,9 +60,7 @@ export default function LobbyOverlay() {
 
   return (
     <div
-      // `dark` scopes the night glass tokens — the game UI keeps its arcade
-      // night identity even when the site is in day theme.
-      className={`dark fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-500 ${
+      className={`fixed inset-0 z-40 flex items-center justify-center transition-opacity duration-500 ${
         visible
           ? "pointer-events-none opacity-100"
           : "pointer-events-none opacity-0"
@@ -75,18 +74,18 @@ export default function LobbyOverlay() {
       >
         <div className="mb-3 flex items-start justify-between">
           <div>
-            <p className="mb-1 font-arcade text-[10px] tracking-widest text-tetra-i/90">
+            <p className="mb-1 font-arcade text-[10px] tracking-widest text-tetraDeep-i dark:text-tetra-i/90">
               // ARENA · {ready ? "READY" : "ENTERING"}
             </p>
             <h2 className="font-arcade text-lg leading-tight tracking-wide md:text-xl">
-              <span className="text-moon">TRICKY</span>{" "}
+              <span className="text-amber-600 dark:text-moon">TRICKY</span>{" "}
               <span style={{ color: "#945edb" }}>TOWERS 3D</span>
             </h2>
           </div>
           <button
             type="button"
             onClick={toggleDark}
-            className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/5 text-base transition hover:border-white/50 hover:bg-white/10"
+            className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-ink/20 bg-ink/5 text-base transition hover:border-ink/50 hover:bg-ink/10"
             title={isDark ? "Switch to day" : "Switch to night"}
           >
             {isDark ? <PiSun /> : <PiMoonFill />}
@@ -100,20 +99,20 @@ export default function LobbyOverlay() {
           className={`play-btn mb-4 block w-full rounded-xl border-2 px-4 py-5 transition disabled:cursor-not-allowed disabled:opacity-50 ${
             canInteract
               ? "border-tetra-i/80"
-              : "border-white/15 bg-black/25"
+              : "border-ink/15 bg-black/25"
           }`}
         >
-          <div className="font-arcade text-[10px] text-white/65">
+          <div className="font-arcade text-[10px] text-ink/70 dark:text-white/65">
             {ready
               ? "PRESS / CLICK"
               : pendingPlayAfterLobby
                 ? "START QUEUED"
                 : "READY IN…"}
           </div>
-          <div className="mt-1 font-arcade text-2xl tracking-widest text-white">
+          <div className="mt-1 font-arcade text-2xl tracking-widest text-ink dark:text-white">
             {ready ? "[ SPACE ]" : pendingPlayAfterLobby ? "[ GO ]" : "WIZARDING…"}
           </div>
-          <div className="mt-1 font-arcade text-[10px] text-white/65">
+          <div className="mt-1 font-arcade text-[10px] text-ink/70 dark:text-white/65">
             {ready
               ? "TO START"
               : pendingPlayAfterLobby
@@ -129,11 +128,13 @@ export default function LobbyOverlay() {
             onClick={() => setMode("SURVIVAL")}
             className={`rounded-lg border-2 px-3 py-2 text-left transition ${
               mode === "SURVIVAL"
-                ? "border-tetra-z/80 bg-tetra-z/15 text-white"
-                : "border-white/20 bg-white/5 text-white/70 hover:border-white/50"
+                ? "border-tetra-z/80 bg-tetra-z/15 text-ink"
+                : "border-ink/20 bg-ink/5 text-ink/70 hover:border-ink/50"
             }`}
           >
-            <div className="font-arcade text-[10px] text-tetra-z">SURVIVAL</div>
+            <div className="font-arcade text-[10px] text-tetraDeep-z dark:text-tetra-z">
+              SURVIVAL
+            </div>
             <div className="text-xs">3 lives. Tower topples → GAME OVER.</div>
           </button>
           <button
@@ -141,11 +142,13 @@ export default function LobbyOverlay() {
             onClick={() => setMode("ENDLESS")}
             className={`rounded-lg border-2 px-3 py-2 text-left transition ${
               mode === "ENDLESS"
-                ? "border-tetra-i/80 bg-tetra-i/15 text-white"
-                : "border-white/20 bg-white/5 text-white/70 hover:border-white/50"
+                ? "border-tetra-i/80 bg-tetra-i/15 text-ink"
+                : "border-ink/20 bg-ink/5 text-ink/70 hover:border-ink/50"
             }`}
           >
-            <div className="font-arcade text-[10px] text-tetra-i">ENDLESS</div>
+            <div className="font-arcade text-[10px] text-tetraDeep-i dark:text-tetra-i">
+              ENDLESS
+            </div>
             <div className="text-xs">No life limit. Stack forever.</div>
           </button>
         </div>
@@ -153,48 +156,61 @@ export default function LobbyOverlay() {
         {/* Block-style carousel — thumbnails are live renders of each skin. */}
         <SkinCarousel active={visible} />
 
-        {/* Character picker — swaps the cloud-rider live in the arena. */}
+        {/* Character carousel — live-rendered thumbnails; swaps the
+            cloud-rider in the arena (which phones can't see behind the
+            card, hence images instead of text chips). */}
+        <CharacterCarousel active={visible} />
+
+        {/* Arena time — flips the game scene between night / day / evening
+            skies, independent of the site theme. */}
         <div className="mb-4 grid grid-cols-3 gap-2">
           {(
             [
-              { id: "OWL", accent: "text-tetra-o", sel: "border-tetra-o/80 bg-tetra-o/15" },
-              { id: "WIZARD", accent: "text-tetra-j", sel: "border-tetra-j/80 bg-tetra-j/15" },
-              { id: "OCTOPUS", accent: "text-tetra-z", sel: "border-tetra-z/80 bg-tetra-z/15" },
+              { id: "NIGHT", icon: PiMoonFill, accent: "text-tetraDeep-o dark:text-tetra-o", sel: "border-tetra-o/80 bg-tetra-o/15" },
+              { id: "DAY", icon: PiSun, accent: "text-tetraDeep-s dark:text-tetra-s", sel: "border-tetra-s/80 bg-tetra-s/15" },
+              { id: "EVENING", icon: PiSunHorizon, accent: "text-tetraDeep-z dark:text-tetra-z", sel: "border-tetra-z/80 bg-tetra-z/15" },
             ] as const
-          ).map((c) => (
+          ).map((t) => (
             <button
-              key={c.id}
+              key={t.id}
               type="button"
-              onClick={() => setCharacter(c.id)}
+              onClick={() => setSceneTime(t.id)}
               className={`rounded-lg border-2 px-2 py-2 text-center transition ${
-                character === c.id
-                  ? `${c.sel} text-white`
-                  : "border-white/20 bg-white/5 text-white/70 hover:border-white/50"
+                sceneTime === t.id
+                  ? `${t.sel} text-ink`
+                  : "border-ink/20 bg-ink/5 text-ink/70 hover:border-ink/50"
               }`}
             >
-              <div className={`font-arcade text-[9px] ${c.accent}`}>{c.id}</div>
+              <div className={`flex items-center justify-center gap-1.5 font-arcade text-[9px] ${t.accent}`}>
+                <t.icon size={13} aria-hidden />
+                {t.id}
+              </div>
             </button>
           ))}
         </div>
 
-        <div className="mb-3 grid grid-cols-2 gap-3 text-left text-xs text-white/85">
+        <div className="mb-3 grid grid-cols-2 gap-3 text-left text-xs text-ink/85">
           <div className="frosted-soft px-3 py-2">
-            <div className="font-arcade text-[9px] text-tetra-i">CONTROLS</div>
+            <div className="font-arcade text-[9px] text-tetraDeep-i dark:text-tetra-i">
+              CONTROLS
+            </div>
             <div className="mt-1 leading-relaxed">
               ← → move<br />↑ rotate<br />↓ soft drop<br />Space · start
             </div>
           </div>
           <div className="frosted-soft px-3 py-2">
-            <div className="font-arcade text-[9px] text-tetra-s">STATUS</div>
+            <div className="font-arcade text-[9px] text-tetraDeep-s dark:text-tetra-s">
+              STATUS
+            </div>
             <div className="mt-1 flex flex-col gap-1">
               <div>
-                <span className="text-white/60">Hi-score</span>{" "}
-                <span className="font-arcade text-[11px] text-tetra-o">
+                <span className="text-ink/60">Hi-score</span>{" "}
+                <span className="font-arcade text-[11px] text-tetraDeep-o dark:text-tetra-o">
                   {highScore}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-white/60">Next:</span>
+                <span className="text-ink/60">Next:</span>
                 <MiniPiece piece={nextPiece} />
               </div>
             </div>
@@ -204,7 +220,7 @@ export default function LobbyOverlay() {
         <button
           type="button"
           onClick={quit}
-          className="inline-flex w-full items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm text-white/80 transition hover:border-white/60 hover:bg-white/5"
+          className="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--line-strong)] px-4 py-2 text-sm text-ink dark:text-ink/80 transition hover:border-ink/60 hover:bg-ink/5"
         >
           Quit · back to portfolio (Q / Esc)
         </button>

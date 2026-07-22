@@ -25,16 +25,18 @@ import {
   SiGrafana,
   SiPrometheus,
   SiHelm,
-  SiMysql,
-  SiGraphql,
+  SiSqlite,
+  SiModelcontextprotocol,
   SiPython,
   SiFlask,
   SiFastapi,
   SiAnsible,
   SiJenkins,
   SiMongodb,
-  SiGooglecloud,
+  SiCloudflare,
+  SiRadixui,
   SiThreedotjs,
+  SiGreensock,
 } from "react-icons/si";
 import {
   FaReact,
@@ -46,8 +48,11 @@ import {
   FaCloud,
   FaTools,
   FaServer,
+  FaDesktop,
+  FaTheaterMasks,
 } from "react-icons/fa";
 import { BsFiletypeSql } from "react-icons/bs";
+import { GiBearFace, GiFencer } from "react-icons/gi";
 import { DiRedis } from "react-icons/di";
 import { VscAzure } from "react-icons/vsc";
 import type { SkillCategory } from "./types";
@@ -55,6 +60,8 @@ import type { SkillCategory } from "./types";
 /**
  * Categories AND items are ordered by proficiency — render order is array
  * order, so reordering is a data edit, no component changes.
+ * brandColor = dark-theme tint; brandColorLight = readable variant on light
+ * glass (needed wherever the brand color is pale).
  */
 export const skills: SkillCategory[] = [
   {
@@ -64,33 +71,120 @@ export const skills: SkillCategory[] = [
     accent: "violet",
     items: [
       { name: "TypeScript", icon: SiTypescript, brandColor: "#3178c6" },
-      { name: "JavaScript", icon: IoLogoJavascript, brandColor: "#f7df1e" },
-      { name: "Python", icon: SiPython, brandColor: "#4b9fd6" },
-      { name: "Java", icon: FaJava, brandColor: "#e76f51" },
-      { name: "C++", icon: SiCplusplus, brandColor: "#659ad2" },
-      { name: "SQL", icon: BsFiletypeSql, brandColor: "#9ca3af" },
+      {
+        name: "JavaScript",
+        icon: IoLogoJavascript,
+        brandColor: "#f7df1e",
+        brandColorLight: "#b45309",
+      },
+      {
+        name: "Python",
+        icon: SiPython,
+        brandColor: "#4b9fd6",
+        brandColorLight: "#306998",
+      },
+      { name: "Java", icon: FaJava, brandColor: "#e76f51", brandColorLight: "#c74634" },
+      {
+        name: "C++",
+        icon: SiCplusplus,
+        brandColor: "#659ad2",
+        brandColorLight: "#00599c",
+      },
+      {
+        name: "SQL",
+        icon: BsFiletypeSql,
+        brandColor: "#9ca3af",
+        brandColorLight: "#4b5563",
+      },
       { name: "HTML5", icon: IoLogoHtml5, brandColor: "#e34f26" },
-      { name: "CSS3", icon: IoLogoCss3, brandColor: "#3b82f6" },
+      { name: "CSS3", icon: IoLogoCss3, brandColor: "#3b82f6", brandColorLight: "#1d4ed8" },
     ],
   },
   {
     id: "frontend",
     label: "Frontend",
-    icon: FaReact,
+    icon: FaDesktop,
     accent: "cyan",
     items: [
-      { name: "React", icon: FaReact, brandColor: "#61dafb" },
-      { name: "Next.js", icon: SiNextdotjs, brandColor: "#cbd5e1" },
-      { name: "Vite", icon: SiVite, brandColor: "#8b7cf6" },
-      { name: "Tailwind CSS", icon: SiTailwindcss, brandColor: "#38bdf8" },
-      { name: "Three.js", icon: SiThreedotjs, brandColor: "#d1d5db" },
-      { name: "ShadCN", icon: SiShadcnui, brandColor: "#cbd5e1" },
-      { name: "Chakra UI", icon: SiChakraui, brandColor: "#4fd1c5" },
-      { name: "Bootstrap", icon: SiBootstrap, brandColor: "#8f6aef" },
+      {
+        name: "React",
+        icon: FaReact,
+        brandColor: "#61dafb",
+        brandColorLight: "#087ea4",
+      },
+      {
+        name: "Next.js",
+        icon: SiNextdotjs,
+        brandColor: "#cbd5e1",
+        brandColorLight: "#111827",
+      },
+      {
+        name: "Vite",
+        icon: SiVite,
+        brandColor: "#8b7cf6",
+        brandColorLight: "#646cff",
+      },
+      {
+        name: "Tailwind CSS",
+        icon: SiTailwindcss,
+        brandColor: "#38bdf8",
+        brandColorLight: "#0284c7",
+      },
+      {
+        name: "ShadCN",
+        icon: SiShadcnui,
+        brandColor: "#cbd5e1",
+        brandColorLight: "#111827",
+      },
+      {
+        name: "Radix UI",
+        icon: SiRadixui,
+        brandColor: "#e5e7eb",
+        brandColorLight: "#111827",
+      },
+      {
+        name: "Chakra UI",
+        icon: SiChakraui,
+        brandColor: "#4fd1c5",
+        brandColorLight: "#319795",
+      },
+      {
+        name: "Bootstrap",
+        icon: SiBootstrap,
+        brandColor: "#8f6aef",
+        brandColorLight: "#7952b3",
+      },
+    ],
+    overflow: [
+      {
+        name: "Three.js",
+        icon: SiThreedotjs,
+        brandColor: "#d1d5db",
+        brandColorLight: "#1f2937",
+      },
+      {
+        name: "GSAP",
+        icon: SiGreensock,
+        brandColor: "#88ce02",
+        brandColorLight: "#5a8a00",
+      },
+      {
+        name: "Zustand",
+        icon: GiBearFace,
+        brandColor: "#d9a066",
+        brandColorLight: "#92400e",
+      },
+      {
+        name: "Rapier",
+        icon: GiFencer,
+        brandColor: "#f2654c",
+        brandColorLight: "#c2410c",
+      },
       {
         name: "Styled Components",
         icon: SiStyledcomponents,
         brandColor: "#db7093",
+        brandColorLight: "#be185d",
       },
     ],
   },
@@ -100,12 +194,42 @@ export const skills: SkillCategory[] = [
     icon: FaServer,
     accent: "green",
     items: [
-      { name: "Node.js", icon: FaNode, brandColor: "#5fbf60" },
-      { name: "Express", icon: SiExpress, brandColor: "#b0b7c3" },
-      { name: "Socket.io", icon: SiSocketdotio, brandColor: "#c4cad4" },
-      { name: "GraphQL", icon: SiGraphql, brandColor: "#e10098" },
-      { name: "FastAPI", icon: SiFastapi, brandColor: "#12b3a8" },
-      { name: "Flask", icon: SiFlask, brandColor: "#9aa5b1" },
+      {
+        name: "Node.js",
+        icon: FaNode,
+        brandColor: "#5fbf60",
+        brandColorLight: "#339933",
+      },
+      {
+        name: "Express",
+        icon: SiExpress,
+        brandColor: "#b0b7c3",
+        brandColorLight: "#374151",
+      },
+      {
+        name: "Socket.io",
+        icon: SiSocketdotio,
+        brandColor: "#c4cad4",
+        brandColorLight: "#374151",
+      },
+      {
+        name: "MCP",
+        icon: SiModelcontextprotocol,
+        brandColor: "#c9d1d9",
+        brandColorLight: "#374151",
+      },
+      {
+        name: "FastAPI",
+        icon: SiFastapi,
+        brandColor: "#12b3a8",
+        brandColorLight: "#0f766e",
+      },
+      {
+        name: "Flask",
+        icon: SiFlask,
+        brandColor: "#9aa5b1",
+        brandColorLight: "#374151",
+      },
     ],
   },
   {
@@ -114,12 +238,42 @@ export const skills: SkillCategory[] = [
     icon: FaDatabase,
     accent: "gold",
     items: [
-      { name: "PostgreSQL", icon: SiPostgresql, brandColor: "#5f9fce" },
-      { name: "MongoDB", icon: SiMongodb, brandColor: "#5fbf60" },
-      { name: "Redis", icon: DiRedis, brandColor: "#e05f4e" },
-      { name: "Firebase", icon: SiFirebase, brandColor: "#ffca28" },
-      { name: "MySQL", icon: SiMysql, brandColor: "#6ba7d6" },
-      { name: "Oracle DB", icon: FaDatabase, brandColor: "#f26a5a" },
+      {
+        name: "PostgreSQL",
+        icon: SiPostgresql,
+        brandColor: "#5f9fce",
+        brandColorLight: "#336791",
+      },
+      {
+        name: "MongoDB",
+        icon: SiMongodb,
+        brandColor: "#5fbf60",
+        brandColorLight: "#2f855a",
+      },
+      {
+        name: "Redis",
+        icon: DiRedis,
+        brandColor: "#e05f4e",
+        brandColorLight: "#dc382d",
+      },
+      {
+        name: "Firebase",
+        icon: SiFirebase,
+        brandColor: "#ffca28",
+        brandColorLight: "#f57c00",
+      },
+      {
+        name: "SQLite",
+        icon: SiSqlite,
+        brandColor: "#6fb4dc",
+        brandColorLight: "#003b57",
+      },
+      {
+        name: "Oracle DB",
+        icon: FaDatabase,
+        brandColor: "#f26a5a",
+        brandColorLight: "#c74634",
+      },
     ],
   },
   {
@@ -128,17 +282,54 @@ export const skills: SkillCategory[] = [
     icon: FaCloud,
     accent: "fuchsia",
     items: [
-      { name: "AWS", icon: FaAws, brandColor: "#ff9900" },
+      { name: "AWS", icon: FaAws, brandColor: "#ff9900", brandColorLight: "#d97706" },
       { name: "Docker", icon: SiDocker, brandColor: "#2496ed" },
-      { name: "Kubernetes", icon: SiKubernetes, brandColor: "#4d8fef" },
-      { name: "Terraform", icon: SiTerraform, brandColor: "#9d7aea" },
-      { name: "GitHub Actions", icon: SiGithubactions, brandColor: "#4a9eff" },
-      { name: "Helm", icon: SiHelm, brandColor: "#6ba7ff" },
-      { name: "Azure", icon: VscAzure, brandColor: "#3b9ce8" },
-      { name: "Google Cloud", icon: SiGooglecloud, brandColor: "#5b9bf8" },
-      { name: "Heroku", icon: SiHeroku, brandColor: "#a586e8" },
-      { name: "Ansible", icon: SiAnsible, brandColor: "#e8e8e8" },
-      { name: "Jenkins", icon: SiJenkins, brandColor: "#d97a6c" },
+      {
+        name: "Kubernetes",
+        icon: SiKubernetes,
+        brandColor: "#4d8fef",
+        brandColorLight: "#326ce5",
+      },
+      {
+        name: "Terraform",
+        icon: SiTerraform,
+        brandColor: "#9d7aea",
+        brandColorLight: "#7b42bc",
+      },
+      {
+        name: "GitHub Actions",
+        icon: SiGithubactions,
+        brandColor: "#4a9eff",
+        brandColorLight: "#2088ff",
+      },
+      { name: "Azure", icon: VscAzure, brandColor: "#3b9ce8", brandColorLight: "#0078d4" },
+      {
+        name: "Heroku",
+        icon: SiHeroku,
+        brandColor: "#a586e8",
+        brandColorLight: "#430098",
+      },
+    ],
+    overflow: [
+      {
+        name: "Helm",
+        icon: SiHelm,
+        brandColor: "#6ba7ff",
+        brandColorLight: "#1d4ed8",
+      },
+      { name: "Cloudflare", icon: SiCloudflare, brandColor: "#f38020", brandColorLight: "#c2570b" },
+      {
+        name: "Ansible",
+        icon: SiAnsible,
+        brandColor: "#e8e8e8",
+        brandColorLight: "#1f2937",
+      },
+      {
+        name: "Jenkins",
+        icon: SiJenkins,
+        brandColor: "#d97a6c",
+        brandColorLight: "#d24939",
+      },
       { name: "Grafana", icon: SiGrafana, brandColor: "#f46800" },
       { name: "Prometheus", icon: SiPrometheus, brandColor: "#e6522c" },
     ],
@@ -149,10 +340,36 @@ export const skills: SkillCategory[] = [
     icon: FaTools,
     accent: "cyan",
     items: [
-      { name: "Vitest", icon: SiVitest, brandColor: "#acd268" },
-      { name: "Mocha", icon: SiMocha, brandColor: "#b7885e" },
-      { name: "Chai", icon: SiChai, brandColor: "#e8a87c" },
-      { name: "JUnit", icon: SiJunit5, brandColor: "#5fb376" },
+      {
+        name: "Vitest",
+        icon: SiVitest,
+        brandColor: "#acd268",
+        brandColorLight: "#6e9f18",
+      },
+      {
+        name: "Playwright",
+        icon: FaTheaterMasks,
+        brandColor: "#5fd068",
+        brandColorLight: "#2ead33",
+      },
+      {
+        name: "Mocha",
+        icon: SiMocha,
+        brandColor: "#b7885e",
+        brandColorLight: "#8d6748",
+      },
+      {
+        name: "Chai",
+        icon: SiChai,
+        brandColor: "#e8a87c",
+        brandColorLight: "#a30701",
+      },
+      {
+        name: "JUnit",
+        icon: SiJunit5,
+        brandColor: "#5fb376",
+        brandColorLight: "#25a162",
+      },
     ],
   },
 ];

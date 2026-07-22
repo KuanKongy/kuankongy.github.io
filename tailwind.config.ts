@@ -26,6 +26,17 @@ export default {
           o: "#8e24aa", // purple
           t: "#43a047", // green
         },
+        // Light-theme counterparts — bright arcade tone in dark, deepened
+        // twin on light glass (pattern: text-tetraDeep-x dark:text-tetra-x).
+        tetraDeep: {
+          i: "#c62828",
+          s: "#0e7490",
+          j: "#1565c0",
+          l: "#b45309",
+          z: "#c2410c",
+          o: "#7b1fa2",
+          t: "#2e7d32",
+        },
         // One accent family grown from the night-sky purple: violet at rest,
         // fuchsia when bright. Deep variants exist for light-theme contrast.
         accent: {
@@ -58,12 +69,16 @@ export default {
         "grad-shift": "grad-shift 4s ease infinite",
       },
       keyframes: {
+        // Cycles all 7 tetromino colors — part of the button's charm.
         "play-pulse": {
-          "0%": { borderColor: "#a78bfa" },
-          "25%": { borderColor: "#d946ef" },
-          "50%": { borderColor: "#38bdf8" },
-          "75%": { borderColor: "#e879f9" },
-          "100%": { borderColor: "#a78bfa" },
+          "0%": { borderColor: "#e53935" },
+          "14%": { borderColor: "#43a047" },
+          "28%": { borderColor: "#26c6da" },
+          "42%": { borderColor: "#e65100" },
+          "57%": { borderColor: "#1e88e5" },
+          "71%": { borderColor: "#ffca28" },
+          "85%": { borderColor: "#8e24aa" },
+          "100%": { borderColor: "#e53935" },
         },
         "wiz-bob": {
           "0%, 100%": { transform: "translateY(0)" },

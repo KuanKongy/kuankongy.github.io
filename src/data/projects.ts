@@ -9,7 +9,6 @@ export const projects: Project[] = [
     slug: "tricky-towers-3d",
     title: "Tricky Towers 3D",
     category: "personal",
-    featured: true,
     blurb:
       "A physics-driven 3D take on Tricky Towers — and the living night-sky world behind this very portfolio.",
     description:
@@ -41,6 +40,7 @@ export const projects: Project[] = [
     slug: "onboardbuddy",
     title: "OnboardBuddy",
     category: "academic",
+    featured: true,
     blurb:
       "AI + static-analysis platform that turns unfamiliar codebases into guided onboarding paths.",
     description:
@@ -70,6 +70,7 @@ export const projects: Project[] = [
     slug: "studyflow",
     title: "StudyFlow",
     category: "hackathon",
+    featured: true,
     blurb:
       "Collaborative study platform with AI-generated summaries and flashcards for group learning.",
     description:
@@ -99,6 +100,7 @@ export const projects: Project[] = [
     slug: "floowforge",
     title: "FloowForge",
     category: "hackathon",
+    featured: true,
     blurb:
       "No-code AI workflow builder — drag nodes on a canvas, run flows by webhook or schedule. Solo build, extended beyond the hackathon.",
     description:
@@ -127,6 +129,7 @@ export const projects: Project[] = [
     slug: "ubcpss",
     title: "UBCPSS Website",
     category: "personal",
+    featured: true,
     blurb:
       "The official website of UBC Project STEM Search — designed and built from scratch for the club.",
     description:
@@ -153,11 +156,12 @@ export const projects: Project[] = [
     slug: "feathersmcp",
     title: "FeathersMCP",
     category: "academic",
+    featured: true,
     blurb:
       "Open-source MCP server bringing FeathersJS v6 docs into AI assistants — published on npm.",
     description:
       "An MCP (Model Context Protocol) server under the FeathersJS ecosystem that integrates FeathersJS v6 documentation into AI assistants like Claude Desktop, Cursor, and VS Code — live access to 47 official documentation pages with source-linked citations, full-text search, and schema-inspection tools. I worked in a team of five alongside the project maintainers, contributing through pull requests and code reviews. Published on npm as feathersjs-mcp.",
-    tech: ["TypeScript", "Node.js", "MCP", "FeathersJS"],
+    tech: ["TypeScript", "Node.js", "MCP", "FeathersJS", "SQLite", "Cloudflare"],
     links: [
       {
         label: "GitHub",
@@ -326,11 +330,11 @@ export const projects: Project[] = [
     youtubeId: "dKfQOmuVBZE",
   },
   {
-    // Merged entry: Master Pokédex (frontend, personal) + National Pokédex
-    // (backend architecture, academic). Category is the closest single fit.
+    // Merged entry: Master Pokédex (frontend) + National Pokédex
+    // (backend architecture, academic).
     slug: "pokedex",
     title: "Pokédex",
-    category: "personal",
+    category: "academic",
     blurb:
       "A two-part Pokédex: social React frontend (Master) + OracleDB-backed REST API (National).",
     description:
@@ -363,6 +367,24 @@ export const projects: Project[] = [
         url: "https://kuankongy.github.io/MasterPokedex/",
         kind: "live",
       },
+    ],
+  },
+  {
+    slug: "portfolio",
+    title: "Portfolio (v1)",
+    category: "personal",
+    blurb:
+      "My previous portfolio site — a responsive Next.js build, the predecessor of the night-sky world you're in now.",
+    description:
+      "My first portfolio website, designed and built from scratch with Next.js, TypeScript, and Tailwind CSS. A responsive single-page site showcasing my skills, experience, and projects, with resume and social links. It served as the foundation this current 3D night-sky portfolio grew out of, and remains live at namkhanhle.dev.",
+    tech: ["TypeScript", "Next.js", "React", "Tailwind CSS"],
+    links: [
+      {
+        label: "GitHub",
+        url: "https://github.com/KuanKongy/Portfolio",
+        kind: "github",
+      },
+      { label: "Live", url: "https://namkhanhle.dev", kind: "live" },
     ],
   },
 ];

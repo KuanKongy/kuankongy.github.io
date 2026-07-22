@@ -41,14 +41,12 @@ export default function AboutSection() {
             <p className="mb-4 text-base text-ink/85 md:text-lg">
               I&apos;m a third-year Computer Science student at the University
               of British Columbia. I love bringing ideas to life with the right
-              blend of backend, frontend, infrastructure — and a little bit of
-              game-dev whimsy.
+              blend of backend, frontend, infrastructure.
             </p>
             <p className="text-base text-ink/75 md:text-lg">
               Recent work spans full-stack web apps, AI-powered tooling,
               multiplayer real-time games, and cloud-native deployments on AWS
-              and Azure with Terraform, Helm, and Kubernetes — plus hands-on UX
-              research with real participants in CPSC 344.
+              and Azure with Terraform, Helm, and Kubernetes.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2">

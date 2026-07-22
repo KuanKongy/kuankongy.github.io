@@ -127,6 +127,10 @@ export class TetrominoManager {
       .setRotation({ x: q.x, y: q.y, z: q.z, w: q.w })
       .setLinearDamping(0.6)
       .setAngularDamping(1.6);
+    if (!isPlayerOrigin) {
+      // Ambient portfolio pieces drift down gently rather than plummeting.
+      desc.setGravityScale(0.5);
+    }
     const body = this.pw.world.createRigidBody(desc);
 
     const handles: number[] = [];
@@ -229,7 +233,15 @@ export class TetrominoManager {
               PLAY_TUNING.idleSpawnMin,
               PLAY_TUNING.idleSpawnMax,
             );
-        this.spawnIdle();
+        // Random burst: usually one or two pieces, sometimes three at
+        // once, sometimes nothing at all this tick.
+        const roll = Math.random();
+        const count =
+          roll < 0.2 ? 0 : roll < 0.5 ? 1 : roll < 0.85 ? 2 : 3;
+        const cap = this.isMobile ? 2 : 3;
+        for (let i = 0; i < Math.min(count, cap); i++) {
+          this.spawnIdle();
+        }
       }
     }
     for (const p of this.pieces) {

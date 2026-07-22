@@ -16,7 +16,7 @@ export interface CloudsHandle {
 }
 
 /** Day-mode cloud colour: bright, white with a hint of warm cream. */
-const DAY_CLOUD = new THREE.Color("#f5f5f8");
+const DAY_CLOUD = new THREE.Color("#f7f5f0");
 
 /**
  * Stylized cumulus clusters at varying depths. Two color tiers per cloud
@@ -92,7 +92,10 @@ export function createClouds(count = 28): CloudsHandle {
     setDayNight: (isDark) => {
       const target = isDark ? PALETTE.cloudLight : DAY_CLOUD;
       cloudMat.color.copy(target);
-      cloudMat.emissive.copy(target).multiplyScalar(isDark ? 0.18 : 0.05);
+      // Day clouds get a modest self-lit lift — enough to avoid the old
+      // steel-gray "storm cloud" read, restrained enough to keep the
+      // day.png-style soft blue shading (full 0.3 looked flat-bright).
+      cloudMat.emissive.copy(target).multiplyScalar(isDark ? 0.18 : 0.15);
       cloudMat.needsUpdate = true;
     },
     dispose: () => disposers.forEach((d) => d()),

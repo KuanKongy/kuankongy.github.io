@@ -30,6 +30,27 @@
       html.dark { background-color: #06030f; }
       html:not(.dark) { background-color: #dbe7fb; }
     </style>
+    <script>
+      // Resolve the theme before first paint. Priority: ?theme= param >
+      // saved toggle > OS preference (first visit). Must mirror stored.dark
+      // in src/store/gameStore.ts.
+      (function () {
+        try {
+          var forced = new URLSearchParams(location.search).get("theme");
+          var saved = localStorage.getItem("trickyTowers.dark");
+          var dark = forced
+            ? forced !== "light"
+            : saved === null
+              ? !matchMedia("(prefers-color-scheme: light)").matches
+              : saved === "1";
+          document.documentElement.classList.toggle("dark", dark);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", dark ? "#1a0a3d" : "#c8d8f8");
+        } catch (e) {
+          /* stay on the static dark default */
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

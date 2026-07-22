@@ -4,6 +4,7 @@ import {
   CAMERA_PLAY,
   PALETTE,
   PALETTE_DAY,
+  PALETTE_EVENING,
   PLAYER,
   TETROMINO_KEYS,
   type TetrominoKey,
@@ -43,6 +44,7 @@ import {
   useGameStore,
   type CharacterId,
   type GamePhase,
+  type SceneTime,
 } from "../store/gameStore";
 
 export type EngineStatus =
@@ -134,18 +136,28 @@ export class GameEngine implements SceneDirector {
     this.statusListeners.forEach((fn) => fn(s));
   }
 
-  private applyVisualTheme(isDark: boolean) {
+  private applyVisualScene(time: SceneTime) {
     if (!this.scene || !this.renderer) return;
-    const sky = isDark ? PALETTE : PALETTE_DAY;
+    const isNight = time === "NIGHT";
+    const sky = isNight
+      ? PALETTE
+      : time === "DAY"
+        ? PALETTE_DAY
+        : PALETTE_EVENING;
     this.renderer.setClearColor(sky.skyTop, 1);
     this.scene.background = sky.skyTop.clone();
-    // Lower exposure at night so the saturated purple sky doesn't blow out;
-    // bump it for day so the blue + sun feel sunlit.
-    this.renderer.toneMappingExposure = isDark ? 0.95 : 1.15;
+    // Lower exposure at night so the saturated purple sky doesn't blow out.
+    // Day stays restrained (day.png: bluish, real shadows — not blown-out
+    // bright); evening runs a touch hotter for the sunset glow.
+    this.renderer.toneMappingExposure = isNight
+      ? 0.95
+      : time === "DAY"
+        ? 1.02
+        : 1.1;
     if (this.scene.fog instanceof THREE.Fog) {
       this.scene.fog.color.copy(sky.groundFog);
-      this.scene.fog.near = isDark ? 100 : 90;
-      this.scene.fog.far = isDark ? 320 : 320;
+      this.scene.fog.near = isNight ? 100 : 90;
+      this.scene.fog.far = isNight ? 320 : 320;
     }
     const skyMat = this.skyMesh?.material as THREE.ShaderMaterial | undefined;
     if (skyMat?.uniforms) {
@@ -154,37 +166,42 @@ export class GameEngine implements SceneDirector {
       skyMat.uniforms.uColorLow.value.copy(sky.skyLow);
       skyMat.uniforms.uColorFog.value.copy(sky.groundFog);
       // Nebula mottling is a night-only flourish.
-      skyMat.uniforms.uNebulaAmt.value = isDark ? 1.0 : 0.0;
+      skyMat.uniforms.uNebulaAmt.value = isNight ? 1.0 : 0.0;
     }
     if (this.hemiLight) {
-      // Dark mode: a softer ambient sky-fill so the towers and arena read
-      // clearly without flooding the scene like daylight. Day mode: full
-      // bright sky-fill hemi.
+      // Night: a softer ambient sky-fill so the towers and arena read
+      // clearly without flooding the scene like daylight. Day keeps the
+      // fill restrained so the sun's shadows stay visible (user: shadows
+      // are enormous — the scene shouldn't look like they don't exist).
       this.hemiLight.color.copy(sky.skyMid);
       this.hemiLight.groundColor.copy(sky.groundFog);
-      this.hemiLight.intensity = isDark ? 0.45 : 1.05;
+      this.hemiLight.intensity = isNight ? 0.45 : time === "DAY" ? 0.85 : 0.95;
     }
     if (this.sunLight) {
-      // Strong key light only in day mode.
-      this.sunLight.color.copy(PALETTE_DAY.moonGlow);
-      this.sunLight.intensity = isDark ? 0.0 : 1.4;
-      this.sunLight.castShadow = !isDark;
-      this.sunLight.visible = !isDark;
+      // Strong key light only when the sun is up — near-white at day,
+      // warm gold at evening (palette-driven).
+      this.sunLight.color.copy(sky.moonGlow);
+      this.sunLight.intensity = isNight ? 0.0 : 1.4;
+      this.sunLight.castShadow = !isNight;
+      this.sunLight.visible = !isNight;
     }
     if (this.moonLight) {
-      // Cool key light from the moon's direction in dark mode — bumped a
+      // Cool key light from the moon's direction at night — bumped a
       // little so the moon visibly "shines" on the towers.
-      this.moonLight.intensity = isDark ? 0.7 : 0.0;
-      this.moonLight.castShadow = isDark;
-      this.moonLight.visible = isDark;
+      this.moonLight.intensity = isNight ? 0.7 : 0.0;
+      this.moonLight.castShadow = isNight;
+      this.moonLight.visible = isNight;
     }
-    if (this.moon) this.moon.group.visible = isDark;
-    if (this.sun) this.sun.group.visible = !isDark;
-    if (this.stars?.points) this.stars.points.visible = isDark;
-    this.clouds?.setDayNight(isDark);
-    this.mountains?.setDayNight(isDark);
-    this.mist?.setDayNight(isDark);
-    this.character?.setDayNight(isDark);
+    if (this.moon) this.moon.group.visible = isNight;
+    if (this.sun) this.sun.group.visible = !isNight;
+    if (this.stars?.points) this.stars.points.visible = isNight;
+    // The dark corners are part of the look's charm — full at night,
+    // eased slightly (not removed) for the sunlit scenes.
+    this.post?.setVignette(isNight ? 0.90 : 0.75);
+    this.clouds?.setDayNight(isNight);
+    this.mountains?.setDayNight(isNight);
+    this.mist?.setDayNight(isNight);
+    this.character?.setDayNight(isNight);
   }
 
   init(): Promise<void> {
@@ -250,10 +267,12 @@ export class GameEngine implements SceneDirector {
         0.45,
       )),
     );
-    // Day-mode key light (sun).
+    // Day-mode key light (sun). Positioned front-of-scene (+z, camera side)
+    // so clouds and mountain faces toward the viewer are sunlit — behind-the-
+    // scene light left everything camera-facing in shade and read overcast.
     const sunLight = new THREE.DirectionalLight(PALETTE_DAY.moonGlow.getHex(), 0.0);
     this.sunLight = sunLight;
-    sunLight.position.set(-10, 30, -8);
+    sunLight.position.set(-14, 30, 22);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.set(1024, 1024);
     sunLight.shadow.camera.left = -25;
@@ -287,7 +306,7 @@ export class GameEngine implements SceneDirector {
     this.moon = createMoon();
     this.scene.add(this.moon.group);
     this.sun = createSun();
-    this.sun.group.visible = false; // applyVisualTheme will toggle correctly
+    this.sun.group.visible = false; // applyVisualScene will toggle correctly
     this.scene.add(this.sun.group);
     this.stars = createStars(900, 110, 60);
     this.scene.add(this.stars.points);
@@ -350,13 +369,15 @@ export class GameEngine implements SceneDirector {
     );
     this.post.setSize(w, h);
 
-    let lastIsDark = useGameStore.getState().isDark;
+    // sceneTime is coupled to the theme in the store (NIGHT ⇔ dark), so it
+    // is the single source of truth for the scene's look.
+    let lastScene = useGameStore.getState().sceneTime;
     this.unsubscribeDark = useGameStore.subscribe((s) => {
-      if (s.isDark === lastIsDark) return;
-      lastIsDark = s.isDark;
-      this.applyVisualTheme(s.isDark);
+      if (s.sceneTime === lastScene) return;
+      lastScene = s.sceneTime;
+      this.applyVisualScene(s.sceneTime);
     });
-    this.applyVisualTheme(useGameStore.getState().isDark);
+    this.applyVisualScene(lastScene);
 
     let lastSkin = useGameStore.getState().blockSkin;
     this.unsubscribeSkin = useGameStore.subscribe((s) => {
@@ -514,7 +535,7 @@ export class GameEngine implements SceneDirector {
     const next = createCharacter(id);
     next.placeAt(pos);
     this.scene.add(next.group);
-    next.setDayNight(useGameStore.getState().isDark);
+    next.setDayNight(useGameStore.getState().sceneTime === "NIGHT");
     next.setCasting(
       this.currentPhase === "WAITING" ||
         this.currentPhase === "LOBBY_TRANSITION",
@@ -633,6 +654,23 @@ export class GameEngine implements SceneDirector {
     this.trailFx?.update(dt);
     this.updateCameraFollow();
     this.camCtrl?.update();
+
+    if (this.currentPhase === "PLAYING" && this.playerPiece) {
+      // A piece that falls past the arena without touching anything is a
+      // LOST piece: no lock, no points — SURVIVAL loses a life via the
+      // same clustered void logic as collapsing towers.
+      if (this.playerPiece.hasFallenOut()) {
+        this.playerPiece.abort();
+        this.playerPiece = null;
+        this.score?.onPlayerVoid();
+        if (
+          useGameStore.getState().phase === "PLAYING" &&
+          useGameStore.getState().lives > 0
+        ) {
+          this.spawnNextPlayerPiece();
+        }
+      }
+    }
 
     if (this.currentPhase === "PLAYING" && this.playerPiece && this.input) {
       const lock = this.playerPiece.update(dt, this.input.isSoftDrop());

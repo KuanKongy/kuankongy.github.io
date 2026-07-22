@@ -7,9 +7,10 @@ import Reveal from "../ui/Reveal";
 import ProjectCard from "../ProjectCard";
 import ProjectModal from "../ProjectModal";
 
-type Filter = "all" | ProjectCategory;
+type Filter = "featured" | "all" | ProjectCategory;
 
 const TABS: { key: Filter; label: string }[] = [
+  { key: "featured", label: "Featured" },
   { key: "all", label: "All" },
   { key: "academic", label: "Academic" },
   { key: "personal", label: "Personal" },
@@ -17,14 +18,16 @@ const TABS: { key: Filter; label: string }[] = [
 ];
 
 export default function ProjectsSection() {
-  const [filter, setFilter] = useState<Filter>("all");
+  const [filter, setFilter] = useState<Filter>("featured");
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   const list = useMemo(() => {
     const filtered =
       filter === "all"
         ? projects
-        : projects.filter((p) => p.category === filter);
+        : filter === "featured"
+          ? projects.filter((p) => p.featured)
+          : projects.filter((p) => p.category === filter);
     return [...filtered].sort(
       (a, b) => Number(b.featured ?? false) - Number(a.featured ?? false),
     );
