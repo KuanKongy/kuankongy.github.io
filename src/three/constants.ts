@@ -36,12 +36,23 @@ export const PALETTE = {
   platformBorderA: new THREE.Color("#c62828"),
   platformBorderB: new THREE.Color("#ff6b6b"),
   pine: new THREE.Color("#3f8b5a"),
-  /** Wizard mascot — light cyan robe + deeper cyan hat, per user request. */
+  /** Owl mascot — light cyan robe + deeper cyan hat, per user request. */
   wizardHat: new THREE.Color("#1f6f86"),
   wizardRobe: new THREE.Color("#7adde6"),
   wizardSkin: new THREE.Color("#f6c9a3"),
   wizardCloud: new THREE.Color("#f4f0ff"),
   wizardStar: new THREE.Color("#ffe14a"),
+  owlBeak: new THREE.Color("#f0a030"),
+  owlWing: new THREE.Color("#4fc0d2"),
+  owlChest: new THREE.Color("#d8f4f8"),
+  hatBand: new THREE.Color("#ffd34d"),
+  /** Classic Tricky-Towers-style wizard. */
+  wizClassicRobe: new THREE.Color("#6d4fc4"),
+  wizClassicHat: new THREE.Color("#3d2a8f"),
+  /** Octopus-in-a-suit homage. */
+  octoSkin: new THREE.Color("#f5a03c"),
+  octoSuit: new THREE.Color("#2e5fbf"),
+  octoTie: new THREE.Color("#d8352c"),
 } as const;
 
 /** Day / light-mode sky — cool blues for portfolio "light theme". */
@@ -111,12 +122,14 @@ export const TETROMINOES = {
 
 export type TetrominoKey = keyof typeof TETROMINOES;
 
+// I / Z / L are deliberately far apart in hue+brightness — the old red /
+// dark-orange / amber triplet blurred together against the night sky.
 export const TETROMINO_COLORS: Record<TetrominoKey, string> = {
-  I: "#e53935", // red
+  I: "#ff3b30", // vivid red
   S: "#26c6da", // cyan
   J: "#1e88e5", // blue
-  L: "#ffca28", // light orange / yellow
-  Z: "#e65100", // dark orange
+  L: "#ffd60a", // clear yellow
+  Z: "#ff8c1a", // clear orange
   O: "#8e24aa", // purple
   T: "#43a047", // green
 };
@@ -197,7 +210,8 @@ export const SCORING = {
   voidClusterMs: 2000,
 } as const;
 
-export const WIZARD = {
+/** Cloud-rider mascot (owl / wizard / octopus) home perch + idle bob. */
+export const CHARACTER = {
   position: new THREE.Vector3(15, 11, -2),
   bobAmplitude: 0.6,
   bobPeriod: 4.0,

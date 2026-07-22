@@ -8,6 +8,8 @@ import {
 } from "../constants";
 import { PhysicsWorld } from "../physics/PhysicsWorld";
 import { TetrominoFactory } from "./TetrominoFactory";
+import type { TrailFx } from "../effects/TrailFx";
+import type { BlockSkin } from "../../store/gameStore";
 
 interface ActivePiece {
   group: THREE.Group;
@@ -17,12 +19,17 @@ interface ActivePiece {
   /** True if this piece originated from the player (locked via PlayerPiece). */
   isPlayerOrigin: boolean;
   onVoid: ((p: ActivePiece) => void) | null;
+  key: TetrominoKey;
+  /** Fractional particle-emission carry for the fall trail. */
+  trailAccum: number;
 }
 
 export class TetrominoManager {
   private scene: THREE.Scene;
   private pw: PhysicsWorld;
   private factory: TetrominoFactory;
+  private trailFx: TrailFx | null;
+  private ambientTrails: boolean;
 
   private pieces: ActivePiece[] = [];
   private byHandle = new Map<number, ActivePiece>();
@@ -33,10 +40,18 @@ export class TetrominoManager {
 
   private playerVoidListeners = new Set<() => void>();
 
-  constructor(scene: THREE.Scene, pw: PhysicsWorld, factory: TetrominoFactory) {
+  constructor(
+    scene: THREE.Scene,
+    pw: PhysicsWorld,
+    factory: TetrominoFactory,
+    trailFx: TrailFx | null = null,
+    ambientTrails = true,
+  ) {
     this.scene = scene;
     this.pw = pw;
     this.factory = factory;
+    this.trailFx = trailFx;
+    this.ambientTrails = ambientTrails;
     this.isMobile = !window.matchMedia("(min-width: 768px)").matches;
     pw.onVoidIntersect((_void, other) => {
       const piece = this.byHandle.get(other.handle);
@@ -74,6 +89,7 @@ export class TetrominoManager {
     group: THREE.Group;
     body: RAPIER.RigidBody;
     colliderHandles: number[];
+    key: TetrominoKey;
   }) {
     const piece: ActivePiece = {
       group: args.group,
@@ -82,6 +98,8 @@ export class TetrominoManager {
       bornAt: performance.now(),
       isPlayerOrigin: true,
       onVoid: null,
+      key: args.key,
+      trailAccum: 0,
     };
     this.pieces.push(piece);
     args.colliderHandles.forEach((h) => this.byHandle.set(h, piece));
@@ -129,6 +147,8 @@ export class TetrominoManager {
       bornAt: performance.now(),
       isPlayerOrigin,
       onVoid: null,
+      key,
+      trailAccum: 0,
     };
     this.pieces.push(piece);
     handles.forEach((h) => this.byHandle.set(h, piece));
@@ -217,6 +237,42 @@ export class TetrominoManager {
       const r = p.body.rotation();
       p.group.position.set(t.x, t.y, t.z);
       p.group.quaternion.set(r.x, r.y, r.z, r.w);
+
+      if (this.trailFx && this.ambientTrails) {
+        const vy = p.body.linvel().y;
+        if (vy < -3) {
+          this.trailFx.beam(p.body.handle, {
+            x: t.x,
+            topY: t.y + 1,
+            z: t.z,
+            width: 1.9,
+            speed: -vy,
+            key: p.key,
+          });
+          p.trailAccum += Math.min(8, -vy * 0.8) * dt;
+          const n = Math.floor(p.trailAccum);
+          if (n > 0) {
+            p.trailAccum -= n;
+            this.trailFx.emit(n, {
+              x: t.x,
+              y: t.y,
+              z: t.z,
+              halfW: 1.1,
+              halfH: 1.0,
+              key: p.key,
+            });
+          }
+        } else {
+          p.trailAccum = 0;
+        }
+      }
+    }
+  }
+
+  /** Swap every live piece (idle + locked) between block skins in place. */
+  reskinAll(skin: BlockSkin) {
+    for (const p of this.pieces) {
+      this.factory.applySkin(p.group, skin);
     }
   }
 

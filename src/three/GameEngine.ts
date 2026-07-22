@@ -16,9 +16,13 @@ import { createSun, type SunHandle } from "./scene/Sun";
 import { createStars, type StarsHandle } from "./scene/Stars";
 import { createClouds, type CloudsHandle } from "./scene/Clouds";
 import { createMountains, type MountainsHandle } from "./scene/Mountains";
+import { createMist, type MistHandle } from "./scene/Mist";
 import { createCastle, type CastleHandle } from "./scene/Castle";
 // VoidFog removed per user request — no ground fog mist near the void.
-import { createWizard, type WizardHandle } from "./scene/Wizard";
+import {
+  createCharacter,
+  type CharacterHandle,
+} from "./scene/characters";
 import { CameraController } from "./gameplay/CameraController";
 import { TetrominoManager } from "./gameplay/TetrominoManager";
 import { TetrominoFactory } from "./gameplay/TetrominoFactory";
@@ -27,13 +31,19 @@ import { PlayerPiece } from "./gameplay/PlayerPiece";
 import { FallingRay } from "./gameplay/FallingRay";
 import { ScoreManager } from "./gameplay/ScoreManager";
 import { createPostProcessing, type PostHandle } from "./effects/PostProcessing";
+import { TrailFx } from "./effects/TrailFx";
 import {
   createShootingStars,
   type ShootingStarsHandle,
 } from "./scene/ShootingStars";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { setDirector, type SceneDirector } from "./sceneBridge";
 import { prefersReducedMotion } from "../lib/motion";
-import { useGameStore, type GamePhase } from "../store/gameStore";
+import {
+  useGameStore,
+  type CharacterId,
+  type GamePhase,
+} from "../store/gameStore";
 
 export type EngineStatus =
   | { phase: "idle" }
@@ -58,22 +68,27 @@ export class GameEngine implements SceneDirector {
   private stars: StarsHandle | null = null;
   private clouds: CloudsHandle | null = null;
   private mountains: MountainsHandle | null = null;
+  private mist: MistHandle | null = null;
   private castle: CastleHandle | null = null;
-  private wizard: WizardHandle | null = null;
+  private character: CharacterHandle | null = null;
   private camCtrl: CameraController | null = null;
   private spawner: TetrominoManager | null = null;
   private factory: TetrominoFactory | null = null;
   private input: InputController | null = null;
   private fallingRay: FallingRay | null = null;
+  private trailFx: TrailFx | null = null;
   private score: ScoreManager | null = null;
   private playerPiece: PlayerPiece | null = null;
   private post: PostHandle | null = null;
 
   private skyMesh: THREE.Mesh | null = null;
+  private blockEnvMap: THREE.Texture | null = null;
   private hemiLight: THREE.HemisphereLight | null = null;
   private sunLight: THREE.DirectionalLight | null = null;
   private moonLight: THREE.DirectionalLight | null = null;
   private unsubscribeDark: (() => void) | null = null;
+  private unsubscribeSkin: (() => void) | null = null;
+  private unsubscribeCharacter: (() => void) | null = null;
 
   private rafId: number | null = null;
   private disposed = false;
@@ -138,6 +153,8 @@ export class GameEngine implements SceneDirector {
       skyMat.uniforms.uColorMid.value.copy(sky.skyMid);
       skyMat.uniforms.uColorLow.value.copy(sky.skyLow);
       skyMat.uniforms.uColorFog.value.copy(sky.groundFog);
+      // Nebula mottling is a night-only flourish.
+      skyMat.uniforms.uNebulaAmt.value = isDark ? 1.0 : 0.0;
     }
     if (this.hemiLight) {
       // Dark mode: a softer ambient sky-fill so the towers and arena read
@@ -166,6 +183,8 @@ export class GameEngine implements SceneDirector {
     if (this.stars?.points) this.stars.points.visible = isDark;
     this.clouds?.setDayNight(isDark);
     this.mountains?.setDayNight(isDark);
+    this.mist?.setDayNight(isDark);
+    this.character?.setDayNight(isDark);
   }
 
   init(): Promise<void> {
@@ -279,10 +298,12 @@ export class GameEngine implements SceneDirector {
 
     this.mountains = createMountains();
     this.scene.add(this.mountains.group);
+    this.mist = createMist();
+    this.scene.add(this.mist.group);
     this.castle = createCastle();
     this.scene.add(this.castle.group);
-    this.wizard = createWizard();
-    this.scene.add(this.wizard.group);
+    this.character = createCharacter(useGameStore.getState().character);
+    this.scene.add(this.character.group);
 
     this.renderer.render(this.scene, this.camera);
 
@@ -293,8 +314,23 @@ export class GameEngine implements SceneDirector {
 
     buildStaticColliders(this.pw, this.castle, this.mountains);
 
-    this.factory = new TetrominoFactory();
-    this.spawner = new TetrominoManager(this.scene, this.pw, this.factory);
+    // Studio environment for the GLOSSY block skin's clearcoat reflections
+    // (applied per-material, NOT scene.environment, so nothing else shifts).
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.blockEnvMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+
+    this.factory = new TetrominoFactory(this.blockEnvMap);
+    this.trailFx = new TrailFx(this.scene);
+    // Ambient (portfolio) trails respect reduced-motion; the player's own
+    // trail stays on — it's gameplay feedback, not decoration.
+    this.spawner = new TetrominoManager(
+      this.scene,
+      this.pw,
+      this.factory,
+      this.trailFx,
+      !prefersReducedMotion(),
+    );
     this.fallingRay = new FallingRay(this.scene);
     this.score = new ScoreManager();
     this.input = new InputController();
@@ -321,6 +357,20 @@ export class GameEngine implements SceneDirector {
       this.applyVisualTheme(s.isDark);
     });
     this.applyVisualTheme(useGameStore.getState().isDark);
+
+    let lastSkin = useGameStore.getState().blockSkin;
+    this.unsubscribeSkin = useGameStore.subscribe((s) => {
+      if (s.blockSkin === lastSkin) return;
+      lastSkin = s.blockSkin;
+      this.spawner?.reskinAll(s.blockSkin);
+    });
+
+    let lastCharacter = useGameStore.getState().character;
+    this.unsubscribeCharacter = useGameStore.subscribe((s) => {
+      if (s.character === lastCharacter) return;
+      lastCharacter = s.character;
+      this.swapCharacter(s.character);
+    });
 
     window.addEventListener("resize", this.boundResize);
     document.addEventListener("visibilitychange", this.boundVisibility);
@@ -399,7 +449,7 @@ export class GameEngine implements SceneDirector {
         this.playerPiece = null;
         this.spawner?.clearAll();
         this.score?.reset();
-        this.wizard?.setCasting(false);
+        this.character?.setCasting(false);
         await this.camCtrl?.tweenTo("PORTFOLIO", 1.2);
         break;
       case "LOBBY_TRANSITION": {
@@ -409,9 +459,9 @@ export class GameEngine implements SceneDirector {
         // Stop the wizard well short of the arena centre — he hovers off to
         // the side casting, never directly over the play column.
         const arenaCenter = new THREE.Vector3(9, ARENA.platformY + 5, PLAYER.spawnZ + 1);
-        this.wizard?.setCasting(true);
+        this.character?.setCasting(true);
         await Promise.all([
-          this.wizard?.flyTo(arenaCenter, 0.7),
+          this.character?.flyTo(arenaCenter, 0.7),
           this.camCtrl?.tweenTo("WAITING", 1.0),
         ]);
         if (useGameStore.getState().phase === "LOBBY_TRANSITION") {
@@ -424,7 +474,7 @@ export class GameEngine implements SceneDirector {
         this.spawner?.clearAll();
         this.score?.reset();
         useGameStore.getState().setNextPieceKey(pickRandomKey());
-        this.wizard?.setCasting(true);
+        this.character?.setCasting(true);
         break;
       case "PLAYING": {
         this.playerPiece?.abort();
@@ -433,8 +483,8 @@ export class GameEngine implements SceneDirector {
         this.spawner?.clearAll();
         this.score?.reset();
         useGameStore.getState().setNextPieceKey(pickRandomKey());
-        this.wizard?.setCasting(false);
-        void this.wizard?.flyHome(0.55);
+        this.character?.setCasting(false);
+        void this.character?.flyHome(0.55);
         await this.camCtrl?.tweenTo("PLAY", 0.9);
         if (useGameStore.getState().phase === "PLAYING") {
           this.spawnNextPlayerPiece();
@@ -445,9 +495,31 @@ export class GameEngine implements SceneDirector {
         this.playerPiece?.abort();
         this.playerPiece = null;
         this.spawner?.setIdleEnabled(false);
-        this.wizard?.setCasting(false);
+        this.character?.setCasting(false);
         break;
     }
+  }
+
+  /**
+   * Live character swap at the rider's current position. Removing the group
+   * from the scene BEFORE dispose matters — dispose() frees GPU resources
+   * but does not detach, and a still-attached group would render black.
+   */
+  private swapCharacter(id: CharacterId) {
+    if (!this.scene || !this.character) return;
+    const old = this.character;
+    const pos = old.group.position.clone();
+    this.scene.remove(old.group);
+    old.dispose();
+    const next = createCharacter(id);
+    next.placeAt(pos);
+    this.scene.add(next.group);
+    next.setDayNight(useGameStore.getState().isDark);
+    next.setCasting(
+      this.currentPhase === "WAITING" ||
+        this.currentPhase === "LOBBY_TRANSITION",
+    );
+    this.character = next;
   }
 
   private spawnNextPlayerPiece() {
@@ -469,6 +541,7 @@ export class GameEngine implements SceneDirector {
       this.factory,
       key,
       this.fallingRay,
+      this.trailFx,
       spawnX,
       spawnY,
       spawnZ,
@@ -553,9 +626,11 @@ export class GameEngine implements SceneDirector {
     this.stars?.update(t);
     this.updatePortfolioEffects(dt);
     this.clouds?.update(t);
+    this.mist?.update(t);
     this.castle?.update(t);
-    this.wizard?.update(t);
+    this.character?.update(t);
     this.spawner?.update(dt);
+    this.trailFx?.update(dt);
     this.updateCameraFollow();
     this.camCtrl?.update();
 
@@ -566,6 +641,7 @@ export class GameEngine implements SceneDirector {
           group: lock.group,
           body: lock.body,
           colliderHandles: lock.colliderHandles,
+          key: lock.key,
         });
         this.score?.onLock({
           flat: lock.flat,
@@ -621,6 +697,10 @@ export class GameEngine implements SceneDirector {
 
     this.unsubscribeDark?.();
     this.unsubscribeDark = null;
+    this.unsubscribeSkin?.();
+    this.unsubscribeSkin = null;
+    this.unsubscribeCharacter?.();
+    this.unsubscribeCharacter = null;
     this.skyMesh = null;
     this.hemiLight = null;
     this.sunLight = null;
@@ -629,7 +709,11 @@ export class GameEngine implements SceneDirector {
     this.input?.dispose();
     this.playerPiece?.abort();
     this.fallingRay?.dispose();
+    this.trailFx?.dispose();
+    this.trailFx = null;
     this.factory?.dispose();
+    this.blockEnvMap?.dispose();
+    this.blockEnvMap = null;
     this.camCtrl?.dispose();
     this.spawner?.dispose();
     this.score?.dispose();
@@ -642,8 +726,9 @@ export class GameEngine implements SceneDirector {
     this.shootingStars = null;
     this.clouds?.dispose();
     this.mountains?.dispose();
+    this.mist?.dispose();
     this.castle?.dispose();
-    this.wizard?.dispose();
+    this.character?.dispose();
 
     this.scene?.traverse((o) => {
       const mesh = o as THREE.Mesh;
@@ -668,8 +753,9 @@ export class GameEngine implements SceneDirector {
     this.stars = null;
     this.clouds = null;
     this.mountains = null;
+    this.mist = null;
     this.castle = null;
-    this.wizard = null;
+    this.character = null;
     this.camCtrl = null;
     this.spawner = null;
     this.factory = null;

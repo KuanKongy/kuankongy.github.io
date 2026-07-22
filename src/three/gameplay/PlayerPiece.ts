@@ -9,6 +9,7 @@ import type { PhysicsWorld } from "../physics/PhysicsWorld";
 import type { TetrominoFactory } from "./TetrominoFactory";
 import type { InputAction } from "./InputController";
 import { FallingRay } from "./FallingRay";
+import type { TrailFx } from "../effects/TrailFx";
 
 export interface PlayerPieceLockResult {
   body: RAPIER.RigidBody;
@@ -71,6 +72,7 @@ export class PlayerPiece {
   private locked = false;
   private excludeColliders = new Set<number>();
   private fallingRay: FallingRay;
+  private trailFx: TrailFx | null;
 
   constructor(
     scene: THREE.Scene,
@@ -78,6 +80,7 @@ export class PlayerPiece {
     factory: TetrominoFactory,
     key: TetrominoKey,
     fallingRay: FallingRay,
+    trailFx: TrailFx | null,
     spawnX: number,
     spawnY: number,
     spawnZ: number,
@@ -88,6 +91,7 @@ export class PlayerPiece {
     this.key = key;
     this.fallingRay = fallingRay;
     this.fallingRay.setKey(key);
+    this.trailFx = trailFx;
 
     const built = factory.create(key);
     this.group = built.group;
@@ -251,12 +255,13 @@ export class PlayerPiece {
     this.group.position.set(this.currentX, this.currentY, this.spawnZ);
     this.group.quaternion.copy(q);
 
+    // No fall trail during gameplay (user call: trails are portfolio-only
+    // ambience); the lock sparkle burst in lockNow() is the only piece FX.
+
     this.fallingRay.update(
-      this.pw,
       new THREE.Vector3(this.currentX, this.currentY, this.spawnZ),
       this.currentRoll,
       this.colliderOffsets,
-      this.excludeColliders,
     );
 
     // Skip the lock check during rotation animation (cell faces aren't world
@@ -316,6 +321,17 @@ export class PlayerPiece {
   private lockNow(): PlayerPieceLockResult {
     this.locked = true;
     this.fallingRay.hide();
+    if (this.trailFx) {
+      const cells = this.colliderOffsets.map((off) => {
+        const [rx, ry] = this.rotatedOffset(off);
+        return new THREE.Vector3(
+          this.currentX + rx,
+          this.currentY + ry,
+          this.spawnZ,
+        );
+      });
+      this.trailFx.burst(cells, this.key);
+    }
 
     const flat = true;
     const q = new THREE.Quaternion().setFromEuler(

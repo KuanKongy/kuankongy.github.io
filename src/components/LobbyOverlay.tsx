@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useGameStore } from "../store/gameStore";
 import { TETROMINO_COLORS } from "../three/constants";
 import { PiMoonFill, PiSun } from "react-icons/pi";
+import SkinCarousel from "./SkinCarousel";
 
 function MiniPiece({ piece }: { piece: keyof typeof TETROMINO_COLORS | null }) {
   if (!piece) return null;
@@ -26,6 +27,8 @@ export default function LobbyOverlay() {
   const highScore = useGameStore((s) => s.highScore);
   const mode = useGameStore((s) => s.mode);
   const setMode = useGameStore((s) => s.setMode);
+  const character = useGameStore((s) => s.character);
+  const setCharacter = useGameStore((s) => s.setCharacter);
   const pendingPlayAfterLobby = useGameStore((s) => s.pendingPlayAfterLobby);
   const queuePendingPlay = useGameStore((s) => s.queuePendingPlay);
   const clearPendingPlay = useGameStore((s) => s.clearPendingPlay);
@@ -145,6 +148,33 @@ export default function LobbyOverlay() {
             <div className="font-arcade text-[10px] text-tetra-i">ENDLESS</div>
             <div className="text-xs">No life limit. Stack forever.</div>
           </button>
+        </div>
+
+        {/* Block-style carousel — thumbnails are live renders of each skin. */}
+        <SkinCarousel active={visible} />
+
+        {/* Character picker — swaps the cloud-rider live in the arena. */}
+        <div className="mb-4 grid grid-cols-3 gap-2">
+          {(
+            [
+              { id: "OWL", accent: "text-tetra-o", sel: "border-tetra-o/80 bg-tetra-o/15" },
+              { id: "WIZARD", accent: "text-tetra-j", sel: "border-tetra-j/80 bg-tetra-j/15" },
+              { id: "OCTOPUS", accent: "text-tetra-z", sel: "border-tetra-z/80 bg-tetra-z/15" },
+            ] as const
+          ).map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCharacter(c.id)}
+              className={`rounded-lg border-2 px-2 py-2 text-center transition ${
+                character === c.id
+                  ? `${c.sel} text-white`
+                  : "border-white/20 bg-white/5 text-white/70 hover:border-white/50"
+              }`}
+            >
+              <div className={`font-arcade text-[9px] ${c.accent}`}>{c.id}</div>
+            </button>
+          ))}
         </div>
 
         <div className="mb-3 grid grid-cols-2 gap-3 text-left text-xs text-white/85">
