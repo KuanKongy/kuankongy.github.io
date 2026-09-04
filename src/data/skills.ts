@@ -26,6 +26,7 @@ import {
   SiPrometheus,
   SiHelm,
   SiSqlite,
+  SiSupabase,
   SiModelcontextprotocol,
   SiPython,
   SiFlask,
@@ -261,6 +262,12 @@ export const skills: SkillCategory[] = [
         icon: SiFirebase,
         brandColor: "#ffca28",
         brandColorLight: "#f57c00",
+      },
+      {
+        name: "Supabase",
+        icon: SiSupabase,
+        brandColor: "#3ecf8e",
+        brandColorLight: "#2e9d6b",
       },
       {
         name: "SQLite",

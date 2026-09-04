@@ -30,6 +30,8 @@ export class CameraController {
   private dragging = false;
   private lastMouse = new THREE.Vector2();
   private dragSensitivity = 0.35;
+  /** Distance between the two fingers of an active pinch (0 = no pinch). */
+  private pinchDist = 0;
 
   private hoverNorm = new THREE.Vector2(0, 0);
 
@@ -38,6 +40,9 @@ export class CameraController {
   private boundMove = (e: MouseEvent) => this.onMouseMove(e);
   private boundWheel = (e: WheelEvent) => this.onWheel(e);
   private boundContext = (e: MouseEvent) => e.preventDefault();
+  private boundTouchStart = (e: TouchEvent) => this.onTouchStart(e);
+  private boundTouchMove = (e: TouchEvent) => this.onTouchMove(e);
+  private boundTouchEnd = (e: TouchEvent) => this.onTouchEnd(e);
 
   constructor(camera: THREE.PerspectiveCamera, dom: HTMLElement) {
     this.camera = camera;
@@ -49,6 +54,16 @@ export class CameraController {
     window.addEventListener("mouseup", this.boundUp);
     window.addEventListener("wheel", this.boundWheel, { passive: false });
     dom.addEventListener("contextmenu", this.boundContext);
+    // Touch: one finger orbits, two fingers pinch-zoom. In PORTFOLIO the
+    // canvas is pointer-events-none, so these only fire in game phases.
+    dom.addEventListener("touchstart", this.boundTouchStart, {
+      passive: true,
+    });
+    dom.addEventListener("touchmove", this.boundTouchMove, {
+      passive: false,
+    });
+    dom.addEventListener("touchend", this.boundTouchEnd);
+    dom.addEventListener("touchcancel", this.boundTouchEnd);
   }
 
   applyMode(mode: Mode) {
@@ -140,6 +155,67 @@ export class CameraController {
     }
   }
 
+  private touchDist(e: TouchEvent): number {
+    const a = e.touches[0];
+    const b = e.touches[1];
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+
+  private onTouchStart(e: TouchEvent) {
+    if (e.touches.length === 1) {
+      this.dragging = true;
+      this.lastMouse.set(e.touches[0].clientX, e.touches[0].clientY);
+    } else if (e.touches.length === 2) {
+      this.dragging = false;
+      this.pinchDist = this.touchDist(e);
+    }
+  }
+
+  private onTouchMove(e: TouchEvent) {
+    // The camera owns this gesture — keep the browser from turning it into
+    // scrolling or a navigation swipe.
+    e.preventDefault();
+    if (e.touches.length === 1 && this.dragging) {
+      const t = e.touches[0];
+      const dx = t.clientX - this.lastMouse.x;
+      const dy = t.clientY - this.lastMouse.y;
+      this.lastMouse.set(t.clientX, t.clientY);
+      this.azimuthDeg = THREE.MathUtils.clamp(
+        this.azimuthDeg + dx * this.dragSensitivity,
+        -45,
+        45,
+      );
+      this.polarDeg = THREE.MathUtils.clamp(
+        this.polarDeg - dy * this.dragSensitivity,
+        5,
+        65,
+      );
+    } else if (e.touches.length === 2) {
+      const d = this.touchDist(e);
+      if (this.pinchDist > 0 && d > 0 && this.mode !== "PORTFOLIO") {
+        // Fingers apart = zoom in (smaller radius), together = out.
+        this.radius = THREE.MathUtils.clamp(
+          (this.radius * this.pinchDist) / d,
+          CAMERA_PLAY.zoomMin,
+          CAMERA_PLAY.zoomMax,
+        );
+      }
+      this.pinchDist = d;
+    }
+  }
+
+  private onTouchEnd(e: TouchEvent) {
+    if (e.touches.length === 0) {
+      this.dragging = false;
+      this.pinchDist = 0;
+    } else if (e.touches.length === 1) {
+      // Pinch ended with one finger still down — resume orbiting from it.
+      this.pinchDist = 0;
+      this.dragging = true;
+      this.lastMouse.set(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }
+
   private onWheel(e: WheelEvent) {
     if (this.mode === "PORTFOLIO") return;
     // Snap zoom — high sensitivity, near-instant. Each wheel "tick" moves
@@ -198,6 +274,10 @@ export class CameraController {
     window.removeEventListener("wheel", this.boundWheel);
     window.removeEventListener("mousemove", this.boundMove);
     window.removeEventListener("mouseup", this.boundUp);
+    this.dom.removeEventListener("touchstart", this.boundTouchStart);
+    this.dom.removeEventListener("touchmove", this.boundTouchMove);
+    this.dom.removeEventListener("touchend", this.boundTouchEnd);
+    this.dom.removeEventListener("touchcancel", this.boundTouchEnd);
     this.dom.style.cursor = "";
   }
 }

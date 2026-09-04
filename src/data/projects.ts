@@ -64,8 +64,9 @@ export const projects: Project[] = [
         url: "https://github.com/KuanKongy/OnboardBuddy",
         kind: "github",
       },
+      { label: "Live", url: "https://onboardbuddy.dev", kind: "live" },
     ],
-    youtubeId: "aPoNS8PYZ5A",
+    youtubeId: "-fiMINQ74q0",
   },
   {
     slug: "studyflow",
@@ -387,6 +388,24 @@ export const projects: Project[] = [
         kind: "github",
       },
       { label: "Live", url: "https://namkhanhle.dev/Portfolio/", kind: "live" },
+    ],
+  },
+  {
+    slug: "onboarddesign",
+    title: "OnboardDesign",
+    category: "academic",
+    blurb:
+      "UBC Arrival Guide — an MVP prototype helping newly arrived international students land on their feet.",
+    description:
+      "An MVP prototype of a two-part product for newly arrived UBC international students. The Arrival Tracker web app is the source of truth: prioritized arrival tasks with consolidated step-by-step instructions, verified peer notes, completion tracking, and an anonymous Q&A board. An email newsletter is generated from the tracker's data — a periodic digest of what's urgent now and what changed, linking back into the tracker. Newsletter issues render to Gmail-ready HTML from the same data modules that drive the site, and task progress persists across reloads.",
+    tech: ["JavaScript", "React", "Vite", "Tailwind CSS"],
+    links: [
+      {
+        label: "GitHub",
+        url: "https://github.com/KuanKongy/OnboardDesign",
+        kind: "github",
+      },
+      { label: "Live", url: "https://onboard-design.vercel.app", kind: "live" },
     ],
   },
 ];

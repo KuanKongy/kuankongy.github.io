@@ -1,4 +1,5 @@
-import { FaLinkedin, FaGithub, FaEnvelope } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { FaLinkedin, FaGithub, FaEnvelope, FaCheck } from "react-icons/fa";
 import photo from "../../assets/images/photo.jpg";
 import SectionHeading from "../ui/SectionHeading";
 import Reveal from "../ui/Reveal";
@@ -13,12 +14,9 @@ const facts: { label: string; accent: TagAccent }[] = [
   { label: "Game Dev", accent: "gold" },
 ];
 
+const EMAIL = "khanhpronam@gmail.com";
+
 const socials = [
-  {
-    href: "mailto:khanhpronam@gmail.com",
-    label: "Email",
-    Icon: FaEnvelope,
-  },
   {
     href: "https://www.linkedin.com/in/kuankongy/",
     label: "LinkedIn",
@@ -31,7 +29,26 @@ const socials = [
   },
 ];
 
+const SOCIAL_BTN =
+  "hover-lift rounded-2xl border border-[color:var(--line-strong)] p-3 text-ink/85 hover:border-[color:var(--accent-strong)] hover:text-[color:var(--accent-strong)]";
+
 export default function AboutSection() {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<number>();
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      setCopied(true);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      window.location.href = `mailto:${EMAIL}`;
+    }
+  }
+
   return (
     <section id="about" className="scroll-mt-24">
       <SectionHeading kicker="// who I am" title="About Me" />
@@ -58,6 +75,39 @@ export default function AboutSection() {
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="relative">
+                {/* Floating "Copied!" pill — eases up and fades in/out. */}
+                <span
+                  aria-hidden
+                  className={`pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-[color:var(--line-strong)] bg-[color:var(--page-bg)] px-2.5 py-1 font-mono text-xs text-ink transition-[opacity,transform] duration-300 ${
+                    copied ? "-translate-y-0.5 opacity-100" : "opacity-0"
+                  }`}
+                >
+                  Copied!
+                </span>
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  aria-label="Copy email address"
+                  className={SOCIAL_BTN}
+                >
+                  {/* Envelope crossfades into a check while copied. */}
+                  <span className="grid">
+                    <FaEnvelope
+                      size={26}
+                      className={`col-start-1 row-start-1 transition-[opacity,transform] duration-300 ${
+                        copied ? "scale-50 opacity-0" : "scale-100 opacity-100"
+                      }`}
+                    />
+                    <FaCheck
+                      size={26}
+                      className={`col-start-1 row-start-1 text-emerald-600 transition-[opacity,transform] duration-300 dark:text-accent-green ${
+                        copied ? "scale-100 opacity-100" : "scale-50 opacity-0"
+                      }`}
+                    />
+                  </span>
+                </button>
+              </div>
               {socials.map(({ href, label, Icon }) => (
                 <a
                   key={label}
@@ -65,11 +115,14 @@ export default function AboutSection() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={label}
-                  className="hover-lift rounded-2xl border border-[color:var(--line-strong)] p-3 text-ink/85 hover:border-[color:var(--accent-strong)] hover:text-[color:var(--accent-strong)]"
+                  className={SOCIAL_BTN}
                 >
                   <Icon size={26} />
                 </a>
               ))}
+              <span aria-live="polite" className="sr-only">
+                {copied ? "Email address copied to clipboard" : ""}
+              </span>
             </div>
           </div>
           <div className="lg:col-span-5">

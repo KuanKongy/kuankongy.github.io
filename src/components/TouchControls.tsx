@@ -7,6 +7,7 @@ import {
   PiCaretRightBold,
 } from "react-icons/pi";
 import { useGameStore } from "../store/gameStore";
+import { touchUIEnabled } from "../lib/touchUI";
 
 /**
  * Fire the same window key events the keyboard produces — InputController
@@ -57,13 +58,7 @@ function HoldButton({
  */
 export default function TouchControls() {
   const phase = useGameStore((s) => s.phase);
-  const enabled = useMemo(
-    () =>
-      typeof window !== "undefined" &&
-      (window.matchMedia("(pointer: coarse)").matches ||
-        new URLSearchParams(window.location.search).has("touch")),
-    [],
-  );
+  const enabled = useMemo(touchUIEnabled, []);
 
   if (!enabled || phase !== "PLAYING") return null;
 

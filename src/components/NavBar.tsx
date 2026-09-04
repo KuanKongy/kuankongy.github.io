@@ -62,7 +62,11 @@ export default function NavBar() {
           duration={400}
           className="flex min-h-[44px] cursor-pointer items-center gap-2.5"
         >
-          <SparkleStar size={26} color="gold" />
+          <SparkleStar
+            size={38}
+            color="gold"
+            variant="emblemStarShortDiamondCore"
+          />
           <span className="font-display text-lg font-bold">
             <span className="grad-text">Nam</span>{" "}
             <span className="text-ink">Le</span>

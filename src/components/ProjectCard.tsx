@@ -22,11 +22,6 @@ export default function ProjectCard({
 
   return (
     <article className="frosted-soft group relative flex h-full flex-col overflow-hidden transition duration-200 hover:-translate-y-1 hover:border-accent-violet/40 hover:shadow-[0_14px_40px_rgba(0,0,0,0.35)]">
-      <span
-        aria-hidden
-        className="absolute inset-x-0 top-0 z-10 h-[2px] bg-gradient-to-r from-accent-violet to-accent-fuchsia opacity-0 transition group-hover:opacity-100"
-      />
-
       <button
         type="button"
         onClick={() => onOpen(project.slug)}

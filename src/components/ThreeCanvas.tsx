@@ -41,6 +41,9 @@ export default function ThreeCanvas() {
           // must NOT swallow clicks — otherwise resume button, hero buttons,
           // section hovers etc. don't work because the canvas covers them.
           phase === "PORTFOLIO" && "pointer-events-none",
+          // In game phases the canvas owns touch gestures (orbit/pinch) —
+          // without this the browser turns swipes into scroll/tab gestures.
+          phase !== "PORTFOLIO" && "touch-none",
         )}
         style={{ display: "block", background: "transparent" }}
       />

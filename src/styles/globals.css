@@ -10,15 +10,17 @@
   --ink: 30 24 58; /* #1e183a deep indigo */
   --heading-ink: #5b21b6; /* deep violet titles — livelier than gray-black */
   --page-bg: #dbe7fb;
-  /* Opaque enough that dark scene objects (castle tower) don't bleed
-     through as muddy smears — whiter also reads cleaner, not grayer. */
-  --glass-bg: rgba(255, 255, 255, 0.86);
-  --glass-bg-soft: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(109, 40, 217, 0.2);
-  --glass-border-soft: rgba(30, 24, 58, 0.14);
+  /* Frosted like the night cards: translucent white over a HEAVY light-only
+     blur (see the .frosted overrides below) so scene objects bleed through
+     as a soft color wash instead of muddy shapes. */
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-bg-soft: rgba(255, 255, 255, 0.48);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-border-soft: rgba(255, 255, 255, 0.45);
   --glass-shadow:
-    0 18px 48px -16px rgba(74, 42, 154, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.35) inset;
+    0 20px 50px -16px rgba(30, 20, 80, 0.35),
+    0 0 0 1px rgba(109, 40, 217, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
   --line-strong: rgba(12, 10, 24, 0.75); /* light theme = black, not gray */
   --accent-strong: #a21caf; /* accessible accent text on light glass */
   --accent-soft: #6d28d9;
@@ -35,6 +37,33 @@
     0 1px 12px rgba(240, 245, 255, 0.75);
   --scrollbar-thumb: rgba(109, 40, 217, 0.35);
   --scrollbar-thumb-hover: rgba(109, 40, 217, 0.55);
+}
+
+/* EVENING is the warm light variant — the UI follows the sunset palette
+   (PALETTE_EVENING in src/three/constants.ts) instead of clashing with it.
+   data-scene is written by applyDomTheme in the store and by the index.html
+   pre-paint script; the two must stay in sync. */
+:root:not(.dark)[data-scene="evening"] {
+  --ink: 40 24 46; /* warm plum-black */
+  --heading-ink: #86198f; /* fuchsia-800 — warm brand over sunset sky */
+  --page-bg: #f3d9b8;
+  --glass-bg: rgba(255, 250, 240, 0.6);
+  --glass-bg-soft: rgba(255, 250, 240, 0.46);
+  --glass-border: rgba(255, 244, 228, 0.65);
+  --glass-border-soft: rgba(255, 244, 228, 0.45);
+  --glass-shadow:
+    0 20px 50px -16px rgba(120, 60, 20, 0.32),
+    0 0 0 1px rgba(162, 28, 175, 0.1),
+    inset 0 1px 0 rgba(255, 250, 240, 0.8);
+  --line-strong: rgba(26, 12, 8, 0.75);
+  --glow: rgba(162, 28, 175, 0.28);
+  --heading-glow:
+    0 0 1px rgba(255, 248, 235, 0.95),
+    0 0 3px rgba(255, 248, 235, 0.9),
+    0 0 6px rgba(255, 246, 230, 0.85),
+    0 1px 12px rgba(255, 238, 214, 0.75);
+  --scrollbar-thumb: rgba(162, 28, 175, 0.35);
+  --scrollbar-thumb-hover: rgba(162, 28, 175, 0.55);
 }
 
 .dark {
@@ -106,6 +135,19 @@ body {
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border-soft);
     border-radius: 1rem;
+  }
+
+  /* Light themes only: the translucent glass needs a much heavier blur so
+     the bright, high-contrast day/evening scenes wash out behind panels.
+     Night keeps the original values — its look is untouched. */
+  :root:not(.dark) .frosted {
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+  }
+
+  :root:not(.dark) .frosted-soft {
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
 
   /* Animated gradient text — the violet→fuchsia family signature. */
@@ -284,8 +326,10 @@ body {
 
 /* Light theme keeps the corners but eases them, matching the 3D scene's
    reduced day/evening vignette. */
+/* Over the light nav the black radials read as dirt at full strength —
+   keep them faint so they register as scene shading, not smudges. */
 :root:not(.dark) .nav-vignette {
-  opacity: 0.75;
+  opacity: 0.45;
 }
 
 /* Bright arcade colors that must stay authentic (true piece colors) get a

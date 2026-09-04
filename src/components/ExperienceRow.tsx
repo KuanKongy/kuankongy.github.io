@@ -29,35 +29,69 @@ export default function ExperienceRow({ entry }: { entry: ExperienceEntry }) {
   const type = TYPE_META[entry.type];
   const dates = entry.dateLabel ?? `${entry.start} – ${entry.end ?? "Present"}`;
 
+  function toggle() {
+    // A click that finishes a drag-selection shouldn't toggle — the header
+    // is a div (not a <button>) precisely so its text stays copyable.
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+    setOpen((o) => !o);
+  }
+
   return (
     <div className="grid grid-cols-[3rem_1fr] items-start gap-x-4">
-      {/* Bubble on the spine, detached from the card. */}
+      {/* Bubble on the spine, detached from the card. Linked to the org's
+          site so it's clickable and the URL can be dragged out. */}
       <span className="relative z-10 mt-2 flex h-12 w-12 items-center justify-center">
-        {entry.logo ? (
-          <img
-            src={entry.logo}
-            alt=""
-            className="h-12 w-12 rounded-full bg-white/90 object-contain p-1 ring-[3px] ring-accent-violetDeep dark:ring-accent-violet"
-          />
-        ) : (
-          <span
-            className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br font-display text-sm font-bold text-white ring-[3px] ring-accent-violetDeep dark:ring-accent-violet ${
-              BUBBLE_GRADIENTS[entry.accent]
-            }`}
-          >
-            {entry.orgInitials}
-          </span>
-        )}
+        {(() => {
+          const bubble = entry.logo ? (
+            <img
+              src={entry.logo}
+              alt=""
+              style={{
+                backgroundColor: entry.logoBg ?? "rgba(255,255,255,0.9)",
+              }}
+              className="h-12 w-12 rounded-full object-contain p-1 ring-[3px] ring-accent-violetDeep dark:ring-accent-violet"
+            />
+          ) : (
+            <span
+              className={`flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br font-display text-sm font-bold text-white ring-[3px] ring-accent-violetDeep dark:ring-accent-violet ${
+                BUBBLE_GRADIENTS[entry.accent]
+              }`}
+            >
+              {entry.orgInitials}
+            </span>
+          );
+          return entry.orgUrl ? (
+            <a
+              href={entry.orgUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Visit ${entry.org}`}
+              className="block h-12 w-12 rounded-full"
+            >
+              {bubble}
+            </a>
+          ) : (
+            bubble
+          );
+        })()}
       </span>
 
       {/* Separate glass card for the content. */}
       <div className="frosted-soft overflow-hidden transition hover:border-accent-violet/40">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
           aria-expanded={open}
           aria-controls={regionId}
-          onClick={() => setOpen((o) => !o)}
-          className="flex w-full cursor-pointer items-center gap-4 p-4 text-left"
+          onClick={toggle}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              toggle();
+            }
+          }}
+          className="flex w-full cursor-pointer select-text items-center gap-4 p-4 text-left"
         >
           <span className="flex min-w-0 flex-1 flex-col gap-0.5">
             <span className="flex flex-wrap items-center gap-2">
@@ -89,7 +123,7 @@ export default function ExperienceRow({ entry }: { entry: ExperienceEntry }) {
               strokeLinejoin="round"
             />
           </svg>
-        </button>
+        </div>
 
         <div
           id={regionId}

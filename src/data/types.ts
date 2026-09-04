@@ -36,6 +36,11 @@ export interface ExperienceEntry {
   /** Fallback for the logo bubble when no logo image exists. */
   orgInitials: string;
   logo?: string;
+  /**
+   * The logo image's own background color — fills the bubble's breathing-room
+   * padding so it blends into the artwork instead of reading as a second ring.
+   */
+  logoBg?: string;
   type: ExperienceType;
   start: string;
   /** Undefined = Present. */

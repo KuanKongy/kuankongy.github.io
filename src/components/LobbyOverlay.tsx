@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useGameStore } from "../store/gameStore";
+import { touchUIEnabled } from "../lib/touchUI";
 import { TETROMINO_COLORS } from "../three/constants";
 import { PiMoonFill, PiSun, PiSunHorizon } from "react-icons/pi";
 import SkinCarousel from "./SkinCarousel";
@@ -57,6 +58,8 @@ export default function LobbyOverlay() {
     else if (phase === "LOBBY_TRANSITION") queuePendingPlay();
   };
   const quit = () => setPhase("PORTFOLIO");
+  // On touch devices, drop the keyboard lingo — those keys don't exist.
+  const touchUI = useMemo(touchUIEnabled, []);
 
   return (
     <div
@@ -104,13 +107,21 @@ export default function LobbyOverlay() {
         >
           <div className="font-arcade text-[10px] text-ink/70 dark:text-white/65">
             {ready
-              ? "PRESS / CLICK"
+              ? touchUI
+                ? "TAP"
+                : "PRESS / CLICK"
               : pendingPlayAfterLobby
                 ? "START QUEUED"
                 : "READY IN…"}
           </div>
           <div className="mt-1 font-arcade text-2xl tracking-widest text-ink dark:text-white">
-            {ready ? "[ SPACE ]" : pendingPlayAfterLobby ? "[ GO ]" : "WIZARDING…"}
+            {ready
+              ? touchUI
+                ? "[ START ]"
+                : "[ SPACE ]"
+              : pendingPlayAfterLobby
+                ? "[ GO ]"
+                : "WIZARDING…"}
           </div>
           <div className="mt-1 font-arcade text-[10px] text-ink/70 dark:text-white/65">
             {ready
@@ -195,7 +206,20 @@ export default function LobbyOverlay() {
               CONTROLS
             </div>
             <div className="mt-1 leading-relaxed">
-              ← → move<br />↑ rotate<br />↓ soft drop<br />Space · start
+              {touchUI ? (
+                <>
+                  ◀ ▶ move · ⟳ rotate
+                  <br />⇊ soft drop
+                  <br />
+                  drag · aim camera
+                  <br />
+                  pinch · zoom
+                </>
+              ) : (
+                <>
+                  ← → move<br />↑ rotate<br />↓ soft drop<br />Space · start
+                </>
+              )}
             </div>
           </div>
           <div className="frosted-soft px-3 py-2">
@@ -222,7 +246,9 @@ export default function LobbyOverlay() {
           onClick={quit}
           className="inline-flex w-full items-center justify-center rounded-full border border-[color:var(--line-strong)] px-4 py-2 text-sm text-ink dark:text-ink/80 transition hover:border-ink/60 hover:bg-ink/5"
         >
-          Quit · back to portfolio (Q / Esc)
+          {touchUI
+            ? "Quit · back to portfolio"
+            : "Quit · back to portfolio (Q / Esc)"}
         </button>
       </div>
     </div>

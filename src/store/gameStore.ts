@@ -248,7 +248,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (typeof window !== "undefined") {
       localStorage.setItem("trickyTowers.sceneTime", t);
       localStorage.setItem("trickyTowers.dark", dark ? "1" : "0");
-      applyDomTheme(dark);
+      applyDomTheme(t);
     }
     set({ sceneTime: t, isDark: dark });
   },
@@ -263,19 +263,24 @@ export const useGameStore = create<GameState>((set, get) => ({
       if (typeof window !== "undefined") {
         localStorage.setItem("trickyTowers.dark", next ? "1" : "0");
         localStorage.setItem("trickyTowers.sceneTime", time);
-        applyDomTheme(next);
+        applyDomTheme(time);
       }
       return { isDark: next, sceneTime: time };
     }),
 }));
 
-function applyDomTheme(dark: boolean) {
+function applyDomTheme(time: SceneTime) {
+  const dark = time === "NIGHT";
   document.documentElement.classList.toggle("dark", dark);
+  document.documentElement.setAttribute("data-scene", time.toLowerCase());
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", dark ? "#1a0a3d" : "#c8d8f8");
+    ?.setAttribute(
+      "content",
+      dark ? "#1a0a3d" : time === "EVENING" ? "#f0c393" : "#c8d8f8",
+    );
 }
 
 if (typeof window !== "undefined") {
-  applyDomTheme(stored.dark);
+  applyDomTheme(stored.sceneTime);
 }

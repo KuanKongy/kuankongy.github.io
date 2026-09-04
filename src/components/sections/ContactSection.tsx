@@ -44,8 +44,29 @@ export default function ContactSection() {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <button type="button" onClick={copyEmail} className="btn-primary">
-                <FaEnvelope size={16} />
-                {copied ? "Copied!" : EMAIL}
+                <FaEnvelope size={16} className="shrink-0" />
+                {/* Both labels share one grid cell so the button keeps the
+                    width of the longer one (the email) while "Copied!" shows. */}
+                <span className="grid">
+                  <span
+                    aria-hidden={copied}
+                    className={`col-start-1 row-start-1 transition-opacity duration-300 ${
+                      copied ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
+                    {EMAIL}
+                  </span>
+                  <span
+                    aria-hidden={!copied}
+                    className={`col-start-1 row-start-1 text-center transition-[opacity,transform] duration-300 ${
+                      copied
+                        ? "translate-y-0 opacity-100"
+                        : "translate-y-1 opacity-0"
+                    }`}
+                  >
+                    Copied!
+                  </span>
+                </span>
               </button>
               <a
                 href="https://www.linkedin.com/in/kuankongy/"
@@ -69,15 +90,6 @@ export default function ContactSection() {
             <span aria-live="polite" className="sr-only">
               {copied ? "Email address copied to clipboard" : ""}
             </span>
-            <p className="mt-4 font-mono text-xs text-ink/70">
-              click to copy or{" "}
-              <a
-                href={`mailto:${EMAIL}`}
-                className="text-[color:var(--accent-strong)] underline-offset-4 hover:underline"
-              >
-                email me directly
-              </a>
-            </p>
           </div>
         </div>
       </Reveal>

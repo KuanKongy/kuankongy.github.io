@@ -62,14 +62,17 @@ function CategoryCard({ category }: { category: SkillCategory }) {
       {overflow.length > 0 && (
         <>
           {/* Desktop (xl) keeps these pills tucked away; hovering (or
-              keyboard-focusing) the card eases the max-height open and the
-              other cards in the same grid row stretch along with it.
-              Mobile and tablet always show everything. */}
-          <div className="xl:max-h-0 xl:overflow-hidden xl:transition-[max-height] xl:duration-500 xl:ease-out xl:group-hover:max-h-[320px] xl:group-focus-within:max-h-[320px]">
-            <div className="flex flex-wrap content-start gap-2 pt-2">
-              {overflow.map((item) => (
-                <SkillPill key={item.name} item={item} />
-              ))}
+              keyboard-focusing) the card eases grid-template-rows 0fr -> 1fr
+              (animates the true content height, so open and close feel the
+              same) and the other cards in the same grid row stretch along
+              with it. Mobile and tablet always show everything. */}
+          <div className="xl:grid xl:grid-rows-[0fr] xl:transition-[grid-template-rows] xl:duration-300 xl:ease-out xl:group-hover:grid-rows-[1fr] xl:group-focus-within:grid-rows-[1fr]">
+            <div className="xl:overflow-hidden">
+              <div className="flex flex-wrap content-start gap-2 pt-2">
+                {overflow.map((item) => (
+                  <SkillPill key={item.name} item={item} />
+                ))}
+              </div>
             </div>
           </div>
           <FaChevronDown

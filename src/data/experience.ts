@@ -12,6 +12,7 @@ export const experience: ExperienceEntry[] = [
     orgUrl: "https://www.ubcpss.ca",
     orgInitials: "PSS",
     logo: ubcpssLogo,
+    logoBg: "#c6eff1",
     type: "club",
     start: "Jan 2026",
     bullets: [
@@ -29,6 +30,7 @@ export const experience: ExperienceEntry[] = [
     orgUrl: "https://feathersjs.com",
     orgInitials: "F",
     logo: feathersLogo,
+    logoBg: "#ffffff",
     type: "open-source",
     start: "Jan 2026",
     end: "April 2026",
@@ -47,6 +49,7 @@ export const experience: ExperienceEntry[] = [
     orgUrl: "https://www.cs.ubc.ca",
     orgInitials: "UBC",
     logo: ubcLogo,
+    logoBg: "#002045",
     type: "teaching",
     start: "Sep 2024",
     end: "Dec 2025",

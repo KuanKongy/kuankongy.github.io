@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { useGameStore } from "../store/gameStore";
+import { touchUIEnabled } from "../lib/touchUI";
 import { TETROMINO_COLORS, TETROMINOES } from "../three/constants";
 
 function NextPiecePreview({ piece }: { piece: keyof typeof TETROMINOES | null }) {
@@ -61,6 +63,8 @@ export default function GameHUD() {
   const lockedCount = useGameStore((s) => s.lockedCount);
   const next = useGameStore((s) => s.nextPieceKey);
   const mode = useGameStore((s) => s.mode);
+  const setPhase = useGameStore((s) => s.setPhase);
+  const touchUI = useMemo(touchUIEnabled, []);
   const visible = phase === "PLAYING" || phase === "GAME_OVER";
 
   return (
@@ -70,6 +74,17 @@ export default function GameHUD() {
       }`}
       aria-hidden={!visible}
     >
+      {/* Touch devices have no Q/Esc — give them a visible way out. */}
+      {touchUI && phase === "PLAYING" && (
+        <button
+          type="button"
+          onClick={() => setPhase("PORTFOLIO")}
+          aria-label="Quit game"
+          className="pointer-events-auto absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink/25 bg-[color:var(--glass-bg-soft)] text-lg text-ink/90 shadow-lg backdrop-blur-md transition active:scale-90 active:border-[color:var(--accent-strong)]"
+        >
+          ✕
+        </button>
+      )}
       <div className="frosted px-5 py-3">
         <div className="font-arcade text-[10px] tracking-widest text-tetraDeep-i dark:text-tetra-i">
           SCORE
