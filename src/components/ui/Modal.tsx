@@ -25,7 +25,9 @@ export default function Modal({ labelledBy, onClose, children }: ModalProps) {
   useEffect(() => {
     const release = lockBodyScroll();
     const opener = document.activeElement as HTMLElement | null;
-    closeRef.current?.focus();
+    // Focus the panel, not the close button — Safari draws the accent
+    // :focus-visible ring around programmatically-focused buttons.
+    panelRef.current?.focus();
     return () => {
       release();
       opener?.focus?.();
@@ -71,7 +73,9 @@ export default function Modal({ labelledBy, onClose, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className="frosted relative max-h-[90dvh] w-full max-w-3xl overflow-y-auto p-5 sm:p-8"
+        tabIndex={-1}
+        style={{ outline: "none" }}
+        className="frosted scrollbar-hidden relative max-h-[90dvh] w-full max-w-3xl overflow-y-auto p-5 sm:p-8"
       >
         <button
           ref={closeRef}

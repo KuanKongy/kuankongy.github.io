@@ -173,7 +173,7 @@ function InspectView({
         type="button"
         onClick={onClose}
         aria-label="Close full-size view"
-        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white transition hover:border-white/70 hover:bg-white/25"
+        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
       >
         ✕
       </button>
@@ -361,7 +361,9 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
         {/* Invisible frame sized for the album's tallest media — identical
             on every slide, so the layout and buttons never move. */}
         <div
-          style={{ aspectRatio: `${frameRatio}` }}
+          // Cap the frame so tall albums never blow the modal past the
+          // viewport — media letterboxes invisibly inside.
+          style={{ aspectRatio: `${frameRatio}`, maxHeight: "60dvh" }}
           className="flex w-full items-center justify-center"
         >
           {current.kind === "video" && (
@@ -369,12 +371,12 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
               controls
               preload="metadata"
               poster={current.poster}
-              className="aspect-video w-full rounded-lg bg-black"
+              className="aspect-video max-h-full w-full rounded-lg bg-black"
               src={current.src}
             />
           )}
           {current.kind === "youtube" && (
-            <div className="aspect-video w-full overflow-hidden rounded-lg">
+            <div className="aspect-video max-h-full w-full overflow-hidden rounded-lg">
               <iframe
                 className="h-full w-full"
                 src={`https://www.youtube-nocookie.com/embed/${current.id}`}
@@ -422,7 +424,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
             type="button"
             onClick={openInspect}
             aria-label="Open full-size view"
-            className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white transition hover:border-white/70 hover:bg-white/25"
+            className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
           >
             <FaExpand size={13} />
           </button>
@@ -435,7 +437,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
                 setIdx((i) => (i - 1 + items.length) % items.length)
               }
               aria-label="Previous media"
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white transition hover:border-white/70 hover:bg-white/25"
+              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
             >
               ‹
             </button>
@@ -443,7 +445,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
               type="button"
               onClick={() => setIdx((i) => (i + 1) % items.length)}
               aria-label="Next media"
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/35 text-white transition hover:border-white/70 hover:bg-white/25"
+              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
             >
               ›
             </button>
@@ -454,7 +456,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
         )}
       </div>
       {many && (
-        <div className="mt-2 flex snap-x gap-2 overflow-x-auto pb-1">
+        <div className="scrollbar-hidden mt-2 flex snap-x gap-2 overflow-x-auto pb-1">
           {items.map((item, i) => {
             const thumb =
               item.kind === "image"

@@ -463,6 +463,14 @@ body {
   }
 }
 
+/* Scrollable but with no visible scrollbar (modal album etc.). */
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }
