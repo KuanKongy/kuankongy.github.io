@@ -75,7 +75,7 @@ export default function Modal({ labelledBy, onClose, children }: ModalProps) {
         aria-labelledby={labelledBy}
         tabIndex={-1}
         style={{ outline: "none" }}
-        className="frosted scrollbar-hidden relative max-h-[90dvh] w-full max-w-3xl overflow-y-auto p-5 sm:p-8"
+        className="frosted modal-opaque scrollbar-hidden relative max-h-[90dvh] w-full max-w-3xl overflow-y-auto border-accent-violetDeep p-5 dark:border-accent-violet sm:p-8"
       >
         <button
           ref={closeRef}

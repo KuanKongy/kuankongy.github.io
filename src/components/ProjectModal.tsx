@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaGithub, FaExternalLinkAlt, FaNpm, FaExpand } from "react-icons/fa";
+import { touchUIEnabled } from "../lib/touchUI";
 import Modal from "./ui/Modal";
 import Tag from "./ui/Tag";
 import { CATEGORY_META } from "../lib/categoryMeta";
@@ -27,36 +28,361 @@ function PlayBadge() {
   );
 }
 
-const ZOOM = 2.5;
+const MAX_SCALE = 4;
 
 const FRAME_RATIO = 16 / 9;
 
+/** Shared style for the overlay circle buttons (arrows, inspect, close). */
+const CTL_BTN =
+  "absolute flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70 active:scale-90";
+
 /**
- * Lightbox above the project modal: the picture at the largest size that
- * fits on screen, with the same click-zoom + drag-pan as the gallery frame.
+ * Pan-and-zoom viewport for one image. Fills its positioned parent; at rest
+ * the image is letterbox-centred exactly like plain object-contain.
+ * A click/tap toggles 2.5× and fit — the discoverable way in. A trackpad
+ * pinch (ctrl+wheel, Safari gesture events, two-finger touch) zooms 1:1
+ * toward the fingers; plain two-finger scroll zooms in from fit and glides
+ * around the image once zoomed, eased through a rAF spring so wheel steps
+ * feel fluid. Dragging pans while zoomed and keeps gliding briefly on
+ * release. Motion is written straight to the img style — React never
+ * re-renders during a gesture; remount (key by src) resets the view.
+ */
+function ZoomPan({
+  src,
+  alt,
+  badge,
+}: {
+  src: string;
+  alt: string;
+  /** Show the live zoom-level pill (click resets to fit) while zoomed. */
+  badge?: boolean;
+}) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const badgeRef = useRef<HTMLButtonElement>(null);
+  const view = useRef({ scale: 1, x: 0, y: 0 }); // painted right now
+  const goal = useRef({ scale: 1, x: 0, y: 0 }); // where the spring heads
+  const vel = useRef({ x: 0, y: 0 }); // pan glide after a drag, px/frame
+  const raf = useRef(0);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  // Distinguishes a plain click/tap (zoom toggle) from a drag or pinch.
+  const gesture = useRef({ startX: 0, startY: 0, moved: false, multi: false });
+  const [zoomed, setZoomed] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  const paint = useCallback(() => {
+    const img = imgRef.current;
+    if (!img) return;
+    const v = view.current;
+    img.style.transform = `translate(${v.x}px, ${v.y}px) scale(${v.scale})`;
+    if (badgeRef.current) {
+      badgeRef.current.textContent = `${v.scale.toFixed(1)}×`;
+    }
+    setZoomed(goal.current.scale > 1.001);
+  }, []);
+
+  /** Clamp pan: the image stays inside the frame, centred where it fits. */
+  const clamp = useCallback((s: { scale: number; x: number; y: number }) => {
+    const wrap = wrapRef.current;
+    const img = imgRef.current;
+    if (!wrap || !img) return;
+    const maxX = Math.max(0, (img.offsetWidth * s.scale - wrap.clientWidth) / 2);
+    const maxY = Math.max(
+      0,
+      (img.offsetHeight * s.scale - wrap.clientHeight) / 2,
+    );
+    s.x = Math.min(maxX, Math.max(-maxX, s.x));
+    s.y = Math.min(maxY, Math.max(-maxY, s.y));
+  }, []);
+
+  /** One animation frame: glide the pan, ease the view toward the goal. */
+  const tick = useCallback(() => {
+    const v = view.current;
+    const g = goal.current;
+    const k = vel.current;
+    if (k.x || k.y) {
+      g.x += k.x;
+      g.y += k.y;
+      k.x *= 0.92;
+      k.y *= 0.92;
+      if (Math.hypot(k.x, k.y) < 0.4) {
+        k.x = 0;
+        k.y = 0;
+      }
+      clamp(g);
+    }
+    v.scale += (g.scale - v.scale) * 0.3;
+    v.x += (g.x - v.x) * 0.3;
+    v.y += (g.y - v.y) * 0.3;
+    const settled =
+      !k.x &&
+      !k.y &&
+      Math.abs(g.scale - v.scale) < 0.001 &&
+      Math.abs(g.x - v.x) < 0.3 &&
+      Math.abs(g.y - v.y) < 0.3;
+    if (settled) {
+      view.current = { ...g };
+      raf.current = 0;
+    } else {
+      raf.current = requestAnimationFrame(tick);
+    }
+    paint();
+  }, [clamp, paint]);
+
+  const animate = useCallback(() => {
+    if (!raf.current) raf.current = requestAnimationFrame(tick);
+  }, [tick]);
+
+  /** Retarget so the frame point under (cx, cy) — client coords — stays put. */
+  const zoomAt = useCallback(
+    (next: number, cx: number, cy: number, immediate = false) => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      const g = goal.current;
+      const s = Math.min(MAX_SCALE, Math.max(1, next));
+      const r = wrap.getBoundingClientRect();
+      const px = cx - r.left - r.width / 2;
+      const py = cy - r.top - r.height / 2;
+      g.x = px - ((px - g.x) * s) / g.scale;
+      g.y = py - ((py - g.y) * s) / g.scale;
+      g.scale = s;
+      if (s <= 1.001) {
+        g.scale = 1;
+        g.x = 0;
+        g.y = 0;
+      }
+      clamp(g);
+      setZoomed(g.scale > 1.001); // cursor + badge react before frame one
+      if (immediate) {
+        view.current = { ...g };
+        paint();
+      } else {
+        animate();
+      }
+    },
+    [animate, clamp, paint],
+  );
+
+  // Native non-passive listeners: React's synthetic handlers can't
+  // preventDefault a wheel, and the page would scroll behind the zoom.
+  // A trackpad pinch reaches Chrome/Firefox as ctrl+wheel, applied 1:1.
+  // Plain two-finger scroll zooms in from fit and pans once zoomed — the
+  // mode is locked per gesture burst so momentum never flips it mid-glide.
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
+    const wheelGesture = { mode: "zoom" as "zoom" | "pan", t: 0 };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const stepY = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+      if (e.ctrlKey || e.metaKey) {
+        wheelGesture.t = 0; // a pinch ends any scroll gesture
+        zoomAt(
+          goal.current.scale * Math.exp(-stepY * 0.01),
+          e.clientX,
+          e.clientY,
+          true,
+        );
+        return;
+      }
+      const now = performance.now();
+      const continues = now - wheelGesture.t < 250;
+      wheelGesture.t = now;
+      if (!continues) {
+        wheelGesture.mode = goal.current.scale > 1.001 ? "pan" : "zoom";
+      }
+      if (wheelGesture.mode === "pan") {
+        const g = goal.current;
+        g.x -= e.deltaMode === 1 ? e.deltaX * 16 : e.deltaX;
+        g.y -= stepY;
+        clamp(g);
+        animate();
+      } else {
+        zoomAt(
+          goal.current.scale * Math.exp(-stepY * 0.0028),
+          e.clientX,
+          e.clientY,
+        );
+      }
+    };
+    // Safari reports the trackpad pinch as gesture* events with a running
+    // e.scale; the pointer-count guard avoids double-applying on iOS where
+    // they fire alongside the two-pointer pinch.
+    let gestureBase = 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const onGestureStart = (e: any) => {
+      e.preventDefault();
+      gestureBase = goal.current.scale;
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const onGestureChange = (e: any) => {
+      e.preventDefault();
+      if (pointers.current.size < 2) {
+        zoomAt(gestureBase * e.scale, e.clientX, e.clientY, true);
+      }
+    };
+    wrap.addEventListener("wheel", onWheel, { passive: false });
+    wrap.addEventListener("gesturestart", onGestureStart);
+    wrap.addEventListener("gesturechange", onGestureChange);
+    return () => {
+      wrap.removeEventListener("wheel", onWheel);
+      wrap.removeEventListener("gesturestart", onGestureStart);
+      wrap.removeEventListener("gesturechange", onGestureChange);
+    };
+  }, [zoomAt, clamp, animate]);
+
+  useEffect(() => {
+    cancelAnimationFrame(raf.current);
+    raf.current = 0;
+    view.current = { scale: 1, x: 0, y: 0 };
+    goal.current = { scale: 1, x: 0, y: 0 };
+    vel.current = { x: 0, y: 0 };
+    pointers.current.clear();
+    setDragging(false);
+    paint();
+    return () => cancelAnimationFrame(raf.current);
+  }, [src, paint]);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    vel.current = { x: 0, y: 0 }; // grabbing the image stops any glide
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 1) {
+      gesture.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        moved: false,
+        multi: false,
+      };
+    } else {
+      gesture.current.multi = true;
+    }
+    if (goal.current.scale > 1 || pointers.current.size === 2) {
+      wrapRef.current?.setPointerCapture(e.pointerId);
+      setDragging(true);
+    }
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const pts = pointers.current;
+    const prev = pts.get(e.pointerId);
+    if (!prev) return;
+    if (
+      Math.hypot(
+        e.clientX - gesture.current.startX,
+        e.clientY - gesture.current.startY,
+      ) > 6
+    ) {
+      gesture.current.moved = true;
+    }
+    const g = goal.current;
+    if (pts.size === 2) {
+      // Pinch: zoom by the distance ratio around the midpoint, pan with it.
+      const [a, b] = [...pts.values()];
+      const prevDist = Math.hypot(a.x - b.x, a.y - b.y);
+      const prevMid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const [a2, b2] = [...pts.values()];
+      const dist = Math.hypot(a2.x - b2.x, a2.y - b2.y);
+      const mid = { x: (a2.x + b2.x) / 2, y: (a2.y + b2.y) / 2 };
+      g.x += mid.x - prevMid.x;
+      g.y += mid.y - prevMid.y;
+      zoomAt(g.scale * (prevDist > 0 ? dist / prevDist : 1), mid.x, mid.y, true);
+    } else if (g.scale > 1) {
+      const dx = e.clientX - prev.x;
+      const dy = e.clientY - prev.y;
+      g.x += dx;
+      g.y += dy;
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      clamp(g);
+      view.current = { ...g };
+      // Low-passed drag speed seeds the glide when the pointer lets go.
+      vel.current.x = vel.current.x * 0.4 + dx * 0.6;
+      vel.current.y = vel.current.y * 0.4 + dy * 0.6;
+      paint();
+    } else {
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const onPointerEnd = (e: React.PointerEvent) => {
+    if (!pointers.current.delete(e.pointerId)) return;
+    if (pointers.current.size === 0) {
+      setDragging(false);
+      const tap =
+        e.type === "pointerup" &&
+        !gesture.current.moved &&
+        !gesture.current.multi;
+      if (tap) {
+        // A plain click/tap toggles the zoom — the discoverable way in.
+        const g = goal.current;
+        if (g.scale > 1.001) zoomAt(1, 0, 0);
+        else zoomAt(2.5, e.clientX, e.clientY);
+      } else if (vel.current.x || vel.current.y) {
+        animate(); // let the pan glide out
+      }
+    }
+  };
+
+  return (
+    <div
+      ref={wrapRef}
+      className={`absolute inset-0 flex select-none items-center justify-center overflow-hidden ${
+        zoomed ? (dragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"
+      }`}
+      style={{ touchAction: "none" }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
+    >
+      <img
+        ref={imgRef}
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="max-h-full max-w-full will-change-transform"
+      />
+      {badge && (
+        <button
+          ref={badgeRef}
+          type="button"
+          onClick={() => zoomAt(1, 0, 0)}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label="Reset zoom"
+          title="Reset zoom"
+          className={`absolute bottom-2 left-1/2 -translate-x-1/2 cursor-pointer rounded-full border border-white/15 bg-black/35 px-3 py-1 font-mono text-xs text-white backdrop-blur-sm transition hover:border-white/50 hover:bg-black/70 active:scale-90 ${
+            zoomed ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
+        >
+          1.0×
+        </button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Lightbox above the project modal. The stage is the album's, not the
+ * photo's: shaped by the tallest image, as large as the viewport allows, so
+ * the overlaid arrows/counter keep one place across the whole album.
  */
 function InspectView({
   src,
   alt,
+  ratio,
+  counter,
+  onPrev,
+  onNext,
   onClose,
 }: {
   src: string;
   alt: string;
+  ratio: number;
+  counter?: string;
+  onPrev?: () => void;
+  onNext?: () => void;
   onClose: () => void;
 }) {
-  const [zoom, setZoom] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const frameRef = useRef<HTMLButtonElement>(null);
-  const drag = useRef<{
-    startX: number;
-    startY: number;
-    baseX: number;
-    baseY: number;
-    moved: boolean;
-  } | null>(null);
-  const suppressClick = useRef(false);
-
   useEffect(() => {
     // Capture phase so Escape closes the inspect view before the modal's
     // own document listener closes the whole dialog.
@@ -64,70 +390,15 @@ function InspectView({
       if (e.key === "Escape") {
         e.stopPropagation();
         onClose();
+      } else if (e.key === "ArrowLeft") {
+        onPrev?.();
+      } else if (e.key === "ArrowRight") {
+        onNext?.();
       }
     }
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [onClose]);
-
-  function clampOffset(x: number, y: number) {
-    const el = frameRef.current;
-    if (!el) return { x, y };
-    const maxX = (el.clientWidth * (ZOOM - 1)) / 2;
-    const maxY = (el.clientHeight * (ZOOM - 1)) / 2;
-    return {
-      x: Math.min(maxX, Math.max(-maxX, x)),
-      y: Math.min(maxY, Math.max(-maxY, y)),
-    };
-  }
-
-  function onClick(e: React.MouseEvent) {
-    if (suppressClick.current) {
-      suppressClick.current = false;
-      return;
-    }
-    if (zoom) {
-      setZoom(false);
-      setOffset({ x: 0, y: 0 });
-      return;
-    }
-    const el = frameRef.current;
-    if (el) {
-      const r = el.getBoundingClientRect();
-      const cx = e.clientX - r.left - r.width / 2;
-      const cy = e.clientY - r.top - r.height / 2;
-      setOffset(clampOffset(-cx * (ZOOM - 1), -cy * (ZOOM - 1)));
-    }
-    setZoom(true);
-  }
-
-  function onPointerDown(e: React.PointerEvent) {
-    if (!zoom) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      baseX: offset.x,
-      baseY: offset.y,
-      moved: false,
-    };
-    setDragging(true);
-  }
-
-  function onPointerMove(e: React.PointerEvent) {
-    const d = drag.current;
-    if (!d) return;
-    const dx = e.clientX - d.startX;
-    const dy = e.clientY - d.startY;
-    if (Math.abs(dx) + Math.abs(dy) > 6) d.moved = true;
-    setOffset(clampOffset(d.baseX + dx, d.baseY + dy));
-  }
-
-  function endDrag() {
-    if (drag.current?.moved) suppressClick.current = true;
-    drag.current = null;
-    setDragging(false);
-  }
+  }, [onClose, onPrev, onNext]);
 
   return createPortal(
     <div
@@ -139,44 +410,50 @@ function InspectView({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <button
-        ref={frameRef}
-        type="button"
-        aria-label={zoom ? "Zoom out" : "Zoom in"}
-        onClick={onClick}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        className={`relative touch-none overflow-hidden rounded-lg border border-accent-violetDeep dark:border-accent-violet ${
-          zoom
-            ? dragging
-              ? "cursor-grabbing"
-              : "cursor-grab"
-            : "cursor-zoom-in"
-        }`}
+      <div
+        className="relative"
+        style={{
+          width: `min(94vw, calc(86dvh * ${ratio}))`,
+          aspectRatio: `${ratio}`,
+        }}
       >
-        <img
-          src={src}
-          alt={alt}
-          draggable={false}
-          style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${
-              zoom ? ZOOM : 1
-            })`,
-            transition: dragging ? "none" : "transform 300ms ease",
-          }}
-          className="max-h-[88dvh] max-w-[94vw] select-none object-contain"
-        />
-      </button>
-      <button
-        type="button"
-        onClick={onClose}
-        aria-label="Close full-size view"
-        className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
-      >
-        ✕
-      </button>
+        <div className="absolute inset-0 overflow-hidden rounded-lg border border-accent-violetDeep dark:border-accent-violet">
+          <ZoomPan key={src} src={src} alt={alt} badge />
+        </div>
+        {onPrev && (
+          <button
+            type="button"
+            onClick={onPrev}
+            aria-label="Previous image"
+            className={`${CTL_BTN} left-2 top-1/2 -translate-y-1/2`}
+          >
+            ‹
+          </button>
+        )}
+        {onNext && (
+          <button
+            type="button"
+            onClick={onNext}
+            aria-label="Next image"
+            className={`${CTL_BTN} right-2 top-1/2 -translate-y-1/2`}
+          >
+            ›
+          </button>
+        )}
+        {counter && (
+          <span className="absolute bottom-2 right-3 rounded-md bg-black/55 px-2 py-0.5 font-mono text-xs text-white">
+            {counter}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close full-size view"
+          className={`${CTL_BTN} right-2 top-2`}
+        >
+          ✕
+        </button>
+      </div>
     </div>,
     document.body,
   );
@@ -184,42 +461,28 @@ function InspectView({
 
 function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
   const [idx, setIdx] = useState(0);
-  const [zoom, setZoom] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
   /** Frame aspect = the tallest media in the album (measured upfront). */
   const [frameRatio, setFrameRatio] = useState(FRAME_RATIO);
   const [inspect, setInspect] = useState(false);
-  const frameRef = useRef<HTMLButtonElement>(null);
-  const drag = useRef<{
-    startX: number;
-    startY: number;
-    baseX: number;
-    baseY: number;
-    moved: boolean;
-  } | null>(null);
-  const suppressClick = useRef(false);
+  const touchUI = useMemo(touchUIEnabled, []);
   const many = items.length > 1;
   const current = items[idx];
+  const imageCount = items.filter((it) => it.kind === "image").length;
+  const imagePos = items
+    .slice(0, idx)
+    .filter((it) => it.kind === "image").length;
 
-  // Keep the zoomed image covering its frame — no panning past its edges.
-  function clampOffset(x: number, y: number) {
-    const el = frameRef.current;
-    if (!el) return { x, y };
-    const maxX = (el.clientWidth * (ZOOM - 1)) / 2;
-    const maxY = (el.clientHeight * (ZOOM - 1)) / 2;
-    return {
-      x: Math.min(maxX, Math.max(-maxX, x)),
-      y: Math.min(maxY, Math.max(-maxY, y)),
-    };
+  /** Jump to the nearest image slide in the given direction (wraps). */
+  function stepImage(dir: 1 | -1) {
+    const n = items.length;
+    for (let k = 1; k <= n; k++) {
+      const j = (idx + dir * k + n) % n;
+      if (items[j].kind === "image") {
+        setIdx(j);
+        return;
+      }
+    }
   }
-
-  function resetZoom() {
-    setZoom(false);
-    setOffset({ x: 0, y: 0 });
-  }
-
-  useEffect(resetZoom, [idx]);
 
   // Measure every album item once and size the frame for the tallest one
   // (smallest width/height ratio). The frame then never changes between
@@ -267,23 +530,26 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.map(itemKey).join("|")]);
 
+  // Preload the neighbouring images so arrow navigation feels instant.
   useEffect(() => {
-    if (!many && !zoom) return;
-    function onKey(e: KeyboardEvent) {
-      if (zoom) {
-        // While zoomed the arrows pan instead of switching slides.
-        const step = 80;
-        if (e.key === "ArrowLeft") {
-          setOffset((o) => clampOffset(o.x + step, o.y));
-        } else if (e.key === "ArrowRight") {
-          setOffset((o) => clampOffset(o.x - step, o.y));
-        } else if (e.key === "ArrowUp") {
-          setOffset((o) => clampOffset(o.x, o.y + step));
-        } else if (e.key === "ArrowDown") {
-          setOffset((o) => clampOffset(o.x, o.y - step));
+    for (const d of [1, -1] as const) {
+      const n = items.length;
+      for (let k = 1; k <= n; k++) {
+        const it = items[(idx + d * k + n) % n];
+        if (it.kind === "image") {
+          const im = new Image();
+          im.src = it.src;
+          break;
         }
-        return;
       }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, items.map(itemKey).join("|")]);
+
+  useEffect(() => {
+    // While inspect is open its own listener owns the arrow keys.
+    if (!many || inspect) return;
+    function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") {
         setIdx((i) => (i - 1 + items.length) % items.length);
       } else if (e.key === "ArrowRight") {
@@ -292,68 +558,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [many, items.length, zoom]);
-
-  function openInspect() {
-    resetZoom();
-    setInspect(true);
-  }
-
-  function onImageClick(e: React.MouseEvent) {
-    if (suppressClick.current) {
-      // This click just finished a pan drag — don't toggle the zoom.
-      suppressClick.current = false;
-      return;
-    }
-    // Touch devices skip in-frame zoom (pointer zooming is clumsy there)
-    // and go straight to the full-size inspect view.
-    if (window.matchMedia("(pointer: coarse)").matches) {
-      openInspect();
-      return;
-    }
-    if (zoom) {
-      resetZoom();
-      return;
-    }
-    // Zoom in toward the clicked point.
-    const el = frameRef.current;
-    if (el) {
-      const r = el.getBoundingClientRect();
-      const cx = e.clientX - r.left - r.width / 2;
-      const cy = e.clientY - r.top - r.height / 2;
-      setOffset(clampOffset(-cx * (ZOOM - 1), -cy * (ZOOM - 1)));
-    }
-    setZoom(true);
-  }
-
-  function onPointerDown(e: React.PointerEvent) {
-    if (!zoom) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      baseX: offset.x,
-      baseY: offset.y,
-      moved: false,
-    };
-    setDragging(true);
-  }
-
-  function onPointerMove(e: React.PointerEvent) {
-    const d = drag.current;
-    if (!d) return;
-    const dx = e.clientX - d.startX;
-    const dy = e.clientY - d.startY;
-    if (Math.abs(dx) + Math.abs(dy) > 6) d.moved = true;
-    setOffset(clampOffset(d.baseX + dx, d.baseY + dy));
-  }
-
-  function endDrag() {
-    if (drag.current?.moved) suppressClick.current = true;
-    drag.current = null;
-    setDragging(false);
-  }
+  }, [many, items.length, inspect]);
 
   return (
     <div>
@@ -386,45 +591,40 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
               />
             </div>
           )}
-          {current.kind === "image" && (
-            /* Click zooms toward the pointer; drag pans; click again zooms
-               back out. On touch, tap opens inspect instead. */
-            <button
-              ref={frameRef}
-              type="button"
-              aria-label={zoom ? "Zoom out" : "Zoom in"}
-              onClick={onImageClick}
-              onPointerDown={onPointerDown}
-              onPointerMove={onPointerMove}
-              onPointerUp={endDrag}
-              onPointerCancel={endDrag}
-              className={`block h-full w-full overflow-hidden rounded-lg ${
-                zoom
-                  ? `touch-none ${dragging ? "cursor-grabbing" : "cursor-grab"}`
-                  : "cursor-zoom-in"
-              }`}
-            >
-              <img
-                src={current.src}
-                alt={`${title} media ${idx + 1} of ${items.length}`}
-                draggable={false}
-                style={{
-                  transform: `translate(${offset.x}px, ${offset.y}px) scale(${
-                    zoom ? ZOOM : 1
-                  })`,
-                  transition: dragging ? "none" : "transform 300ms ease",
-                }}
-                className="h-full w-full select-none object-contain"
-              />
-            </button>
-          )}
+          {current.kind === "image" &&
+            (touchUI ? (
+              /* On touch the tap opens the inspect lightbox — in-frame
+                 pinching would fight the modal's own scrolling. */
+              <div
+                role="button"
+                aria-label="Open full-size view"
+                onClick={() => setInspect(true)}
+                className="block h-full w-full overflow-hidden rounded-lg"
+              >
+                <img
+                  src={current.src}
+                  alt={`${title} media ${idx + 1} of ${items.length}`}
+                  draggable={false}
+                  className="h-full w-full select-none object-contain"
+                />
+              </div>
+            ) : (
+              <div className="relative h-full w-full overflow-hidden rounded-lg">
+                <ZoomPan
+                  key={current.src}
+                  src={current.src}
+                  alt={`${title} media ${idx + 1} of ${items.length}`}
+                />
+              </div>
+            ))}
         </div>
-        {current.kind === "image" && (
+        {/* Touch users open inspect by tapping the picture itself. */}
+        {!touchUI && current.kind === "image" && (
           <button
             type="button"
-            onClick={openInspect}
+            onClick={() => setInspect(true)}
             aria-label="Open full-size view"
-            className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
+            className={`${CTL_BTN} right-2 top-2`}
           >
             <FaExpand size={13} />
           </button>
@@ -437,7 +637,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
                 setIdx((i) => (i - 1 + items.length) % items.length)
               }
               aria-label="Previous media"
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
+              className={`${CTL_BTN} left-2 top-1/2 -translate-y-1/2`}
             >
               ‹
             </button>
@@ -445,7 +645,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
               type="button"
               onClick={() => setIdx((i) => (i + 1) % items.length)}
               aria-label="Next media"
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/20 text-white transition hover:border-white/50 hover:bg-black/70"
+              className={`${CTL_BTN} right-2 top-1/2 -translate-y-1/2`}
             >
               ›
             </button>
@@ -473,7 +673,7 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
                 className={`relative h-14 w-24 shrink-0 snap-start overflow-hidden rounded-md border-2 transition ${
                   i === idx
                     ? "border-accent-fuchsia"
-                    : "border-white opacity-60 hover:opacity-100 dark:border-ink/30"
+                    : "border-accent-violetDeep/45 opacity-60 hover:opacity-100 dark:border-accent-violet/45"
                 }`}
               >
                 {thumb ? (
@@ -495,6 +695,12 @@ function Gallery({ items, title }: { items: MediaItem[]; title: string }) {
         <InspectView
           src={current.src}
           alt={`${title} media ${idx + 1} full size`}
+          ratio={frameRatio}
+          counter={
+            imageCount > 1 ? `${imagePos + 1} / ${imageCount}` : undefined
+          }
+          onPrev={imageCount > 1 ? () => stepImage(-1) : undefined}
+          onNext={imageCount > 1 ? () => stepImage(1) : undefined}
           onClose={() => setInspect(false)}
         />
       )}

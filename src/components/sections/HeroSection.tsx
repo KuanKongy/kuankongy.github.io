@@ -76,9 +76,12 @@ export default function HeroSection() {
         </div>
       </div>
 
+      {/* On short viewports (small phones) the pinned indicator lands on the
+          hero card, so it flows below the card instead; taller screens keep
+          it pinned to the section bottom. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-ink/60"
+        className="pointer-events-none mt-10 flex flex-col items-center gap-1.5 self-center text-ink/60 [@media(min-height:750px)]:absolute [@media(min-height:750px)]:bottom-4 [@media(min-height:750px)]:left-1/2 [@media(min-height:750px)]:mt-0 [@media(min-height:750px)]:-translate-x-1/2 [@media(min-height:750px)]:self-auto"
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.35em]">
           scroll

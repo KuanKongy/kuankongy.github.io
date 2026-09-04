@@ -463,6 +463,16 @@ body {
   }
 }
 
+/* Dialog panels carry lots of reading text; in light mode the dark page
+   shows through regular light glass and greys the ground under the words,
+   so they get a near-opaque backing. Dark mode is untouched. */
+:root:not(.dark) .modal-opaque {
+  background: rgba(255, 255, 255, 0.94);
+}
+:root:not(.dark)[data-scene="evening"] .modal-opaque {
+  background: rgba(255, 250, 240, 0.94);
+}
+
 /* Scrollable but with no visible scrollbar (modal album etc.). */
 .scrollbar-hidden {
   scrollbar-width: none;

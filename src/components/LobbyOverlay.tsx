@@ -71,7 +71,7 @@ export default function LobbyOverlay() {
       aria-hidden={!visible}
     >
       <div
-        className={`frosted w-full max-w-md px-8 py-7 text-center ${
+        className={`frosted scrollbar-hidden max-h-[94dvh] w-full max-w-md overflow-y-auto px-8 py-7 text-center ${
           visible ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
