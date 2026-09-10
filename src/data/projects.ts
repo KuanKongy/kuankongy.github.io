@@ -104,7 +104,7 @@ export const projects: Project[] = [
     category: "hackathon",
     featured: true,
     blurb:
-      "No-code AI workflow builder — drag nodes on a canvas, run flows by webhook or schedule. Solo build, extended beyond the hackathon.",
+      "No-code AI workflow builder — drag nodes on a canvas, run flows by webhook or schedule.",
     description:
       "A no-code AI workflow platform started solo at a hackathon and extended into an ongoing personal project. Users drag and drop nodes on a canvas to compose AI-powered pipelines, save flows to their account, and expose them via webhooks or schedules, with results streaming back to the canvas in real time. Supports subflows, prompt-template custom nodes, and multiple AI providers (OpenAI, Google Gemini, Cloudflare Workers AI) — built to help people learn automation concepts and to run automatic workflows for them.",
     tech: [

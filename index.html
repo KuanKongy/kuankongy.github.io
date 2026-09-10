@@ -5,7 +5,9 @@
     <!-- PNG favicons at the max useful sizes (512 = PWA/install ceiling,
          32 = tab). Safari rasterizes SVG favicons poorly (the white-border
          culprit) and tends to pick the LAST declared icon — keep 512 last.
-         Source of truth stays favicon-v3.svg. -->
+         Generated from favicon-v7.svg — swap the design with
+         `python3 scripts/make-favicons.py v3` (any favicon-vN.svg works;
+         the script rewrites the PNGs and this comment). -->
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="./favicon-512.png" />
     <!-- Safari start page / bookmarks / tab-hover icon — full-bleed square,

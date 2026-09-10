@@ -2,7 +2,7 @@
 
 My portfolio [kuankongy.github.io](https://kuankongy.github.io) with an interactive 3D background you can step into and play.
 
-Behind the glass is a nod to [Tricky Towers](https://www.trickytowers.com/): teris with physics. Full game: [kuankongy.github.io/Tricky3DTowers](https://kuankongy.github.io/Tricky3DTowers/).
+Behind the glass is a nod to [Tricky Towers](https://www.trickytowers.com/): tetris with physics. Full game: [kuankongy.github.io/Tricky3DTowers](https://kuankongy.github.io/Tricky3DTowers/).
 
 ## Why this game
 

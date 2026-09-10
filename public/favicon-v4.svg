@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0b0620"/>
+  <!-- v4 favicon: the classic 4-point sparkle (SPARKLE_PATH in
+       SparkleStar.tsx — the footer / empty-album mark) scaled x4 to full
+       bleed, in its own violet gradient. -->
+  <path fill="url(#g)" d="M32 0 L39.2 24.8 L64 32 L39.2 39.2 L32 64 L24.8 39.2 L0 32 L24.8 24.8 Z"/>
+</svg>

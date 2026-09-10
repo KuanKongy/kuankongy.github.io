@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <radialGradient id="d" cx="32" cy="32" r="19" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="0.35" stop-color="#a5f3e8"/>
+      <stop offset="1" stop-color="#1fc7b2"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0b0620"/>
+  <!-- v5 favicon: v3 (white-core radial eyes) redrawn bolder, to be readable
+       small — blades flare to ±7.3 (v3: ±5.61), eye cut pushed outward so
+       the cyan eyes span 13.7..31.8 (eye cut narrowed to ~1.0, matching the
+       center cut channels), diagonal spikes widened to 4.5 at their
+       widest and stretched to (9.5,9.5): asymmetric kites, outer side
+       elongated. Continuity rule: each kite's cross-line (its side vertices)
+       lies ON the pinch line x+y=45.2 through the blade waist corner
+       (24.7,20.5) and the eye waist corner (20.5,24.7), so the three waists
+       stay collinear across the cuts. -->
+  <path fill="url(#g)" d="M32 0 L30.1 3.5 L24.7 20.5 L32 31.8 L39.3 20.5 L33.9 3.5 Z"/>
+  <path fill="url(#g)" d="M32 64 L30.1 60.5 L24.7 43.5 L32 32.2 L39.3 43.5 L33.9 60.5 Z"/>
+  <path fill="url(#d)" d="M20.5 24.7 L13.7 26.9 L18.4 32 L13.7 37.1 L20.5 39.3 L31.8 32 Z"/>
+  <path fill="url(#g)" d="M0 32 L3.5 30.1 L12.5 27.2 L17.3 32 L12.5 36.8 L3.5 33.9 Z"/>
+  <path fill="url(#d)" d="M43.5 24.7 L50.3 26.9 L45.6 32 L50.3 37.1 L43.5 39.3 L32.2 32 Z"/>
+  <path fill="url(#g)" d="M64 32 L60.5 30.1 L51.5 27.2 L46.7 32 L51.5 36.8 L60.5 33.9 Z"/>
+  <path fill="url(#g)" d="M33 31 L43 24.2 L54.5 9.5 L39.8 21 Z"/>
+  <path fill="url(#g)" d="M31 31 L24.2 21 L9.5 9.5 L21 24.2 Z"/>
+  <path fill="url(#g)" d="M33 33 L39.8 43 L54.5 54.5 L43 39.8 Z"/>
+  <path fill="url(#g)" d="M31 33 L21 39.8 L9.5 54.5 L24.2 43 Z"/>
+</svg>

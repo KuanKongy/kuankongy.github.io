@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <radialGradient id="d" cx="32" cy="32" r="18" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="0.35" stop-color="#a5f3e8"/>
+      <stop offset="1" stop-color="#1fc7b2"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#0b0620"/>
+  <!-- v7 favicon: the midpoint of v3 and v6 — every vertex averaged, so the
+       whole emblem sits between the two weights: blades flare to ±6.5
+       (v3 ±5.61, v6 ±7.3), kite tips at 12.06 (v3 14.61, v6 9.5), radial
+       eye gradient r=18 (17/19). Same construction rules as v5/v6: blade
+       waist corner (25.5,21) and eye waist corner (21,25.5) mirrored across
+       the diagonal, kite cross-lines ON the pinch line x+y=46.5 so the three
+       waists stay collinear, diagonal spikes keep the v3/v6 horizontal
+       width 3.46 (side vertices 24.98/21.52), gaps ~0.7. -->
+  <path fill="url(#g)" d="M32 0 L30.19 3.38 L25.5 21 L32 31.8 L38.5 21 L33.81 3.38 Z"/>
+  <path fill="url(#g)" d="M32 64 L30.19 60.62 L25.5 43 L32 32.2 L38.5 43 L33.81 60.62 Z"/>
+  <path fill="url(#d)" d="M21 25.5 L14.56 27.34 L19.37 32 L14.56 36.66 L21 38.5 L31.8 32 Z"/>
+  <path fill="url(#g)" d="M0 32 L3.38 30.21 L13.3 27.68 L18.04 32 L13.3 36.32 L3.38 33.79 Z"/>
+  <path fill="url(#d)" d="M43 25.5 L49.44 27.34 L44.63 32 L49.44 36.66 L43 38.5 L32.2 32 Z"/>
+  <path fill="url(#g)" d="M64 32 L60.62 30.21 L50.7 27.68 L45.96 32 L50.7 36.32 L60.62 33.79 Z"/>
+  <path fill="url(#g)" d="M32.91 31.09 L42.48 24.98 L51.94 12.06 L39.02 21.52 Z"/>
+  <path fill="url(#g)" d="M31.09 31.09 L24.98 21.52 L12.06 12.06 L21.52 24.98 Z"/>
+  <path fill="url(#g)" d="M32.91 32.91 L39.02 42.48 L51.94 51.94 L42.48 39.02 Z"/>
+  <path fill="url(#g)" d="M31.09 32.91 L21.52 39.02 L12.06 51.94 L24.98 42.48 Z"/>
+</svg>
