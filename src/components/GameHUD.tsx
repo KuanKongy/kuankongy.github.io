@@ -69,22 +69,11 @@ export default function GameHUD() {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-20 transition-opacity duration-500 md:px-8 ${
+      className={`pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-20 transition-opacity duration-500 md:px-8 md:pt-20 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
       aria-hidden={!visible}
     >
-      {/* Touch devices have no Q/Esc — give them a visible way out. */}
-      {touchUI && phase === "PLAYING" && (
-        <button
-          type="button"
-          onClick={() => setPhase("PORTFOLIO")}
-          aria-label="Quit game"
-          className="pointer-events-auto absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink/25 bg-[color:var(--glass-bg-soft)] text-lg text-ink/90 shadow-lg backdrop-blur-md transition active:scale-90 active:border-[color:var(--accent-strong)]"
-        >
-          ✕
-        </button>
-      )}
       <div className="frosted px-5 py-3">
         <div className="font-arcade text-[10px] tracking-widest text-tetraDeep-i dark:text-tetra-i">
           SCORE
@@ -108,7 +97,7 @@ export default function GameHUD() {
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-3">
+      <div className="flex flex-col items-end gap-1.5">
         {mode === "SURVIVAL" ? (
           <div className="frosted flex items-center gap-2 px-4 py-2">
             <span className="mr-1 font-arcade text-[10px] text-tetraDeep-z dark:text-tetra-z">
@@ -134,6 +123,17 @@ export default function GameHUD() {
           </span>
           <NextPiecePreview piece={next} />
         </div>
+        {/* Touch devices have no Q/Esc — give them a visible way out. */}
+        {touchUI && phase === "PLAYING" && (
+          <button
+            type="button"
+            onClick={() => setPhase("PORTFOLIO")}
+            aria-label="Quit game"
+            className="pointer-events-auto flex h-11 w-11 items-center justify-center self-end rounded-full border-2 border-ink/25 bg-[color:var(--glass-bg-soft)] text-lg text-ink/90 shadow-lg backdrop-blur-md transition active:scale-90 active:border-[color:var(--accent-strong)]"
+          >
+            ✕
+          </button>
+        )}
       </div>
     </div>
   );

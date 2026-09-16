@@ -208,8 +208,9 @@ export default function LobbyOverlay() {
             <div className="mt-1 leading-relaxed">
               {touchUI ? (
                 <>
-                  ◀ ▶ move · ⟳ rotate
-                  <br />⇊ soft drop
+                  ← → move 
+                  <br />⟳ rotate
+                  <br />↓ soft drop
                   <br />
                   drag · aim camera
                   <br />
