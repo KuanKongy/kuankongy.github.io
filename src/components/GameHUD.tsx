@@ -69,7 +69,7 @@ export default function GameHUD() {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-20 transition-opacity duration-500 md:px-8 md:pt-20 ${
+      className={`pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-4 pt-20 transition-opacity duration-500 md:px-8 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
       aria-hidden={!visible}
